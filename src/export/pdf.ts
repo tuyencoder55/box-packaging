@@ -1,0 +1,123 @@
+// Xuất file PDF chuẩn in ấn: 2 Layer OCG (CUT, CREASE), màu pha Separation CMYK, Overprint
+import { chainSegments, type Polyline } from '../core/chain';
+import type { Dieline } from '../core/types';
+import { PdfWriter } from './pdfWriter';
+
+const MM_TO_PT = 72 / 25.4;
+
+function round3(n: number): number {
+  return Math.round(n * 1000) / 1000;
+}
+
+function polylineToPdfOps(line: Polyline, originX: number, originY: number, totalH_mm: number): string {
+  if (line.pts.length === 0) return '';
+  const ops: string[] = [];
+
+  const toPtX = (x: number) => round3((x - originX) * MM_TO_PT);
+  // Trục Y của PDF hướng lên trên: y' = totalH - (y - originY)
+  const toPtY = (y: number) => round3((totalH_mm - (y - originY)) * MM_TO_PT);
+
+  const p0 = line.pts[0];
+  ops.push(`${toPtX(p0[0])} ${toPtY(p0[1])} m`);
+
+  for (let i = 1; i < line.pts.length; i++) {
+    const pt = line.pts[i];
+    ops.push(`${toPtX(pt[0])} ${toPtY(pt[1])} l`);
+  }
+
+  if (line.closed) {
+    ops.push('h'); // Đóng đường
+  }
+
+  ops.push('S'); // Stroke
+  return ops.join(' ');
+}
+
+/**
+ * Sinh file PDF hoàn chỉnh chuẩn nhà in
+ */
+export function generatePdfContent(dieline: Dieline, margin: number = 5): string {
+  const [minX, minY, width, height] = dieline.bbox;
+  const originX = minX - margin;
+  const originY = minY - margin;
+  const totalW_mm = width + margin * 2;
+  const totalH_mm = height + margin * 2;
+
+  const totalW_pt = round3(totalW_mm * MM_TO_PT);
+  const totalH_pt = round3(totalH_mm * MM_TO_PT);
+
+  const trimMinX_pt = round3(margin * MM_TO_PT);
+  const trimMinY_pt = round3(margin * MM_TO_PT);
+  const trimMaxX_pt = round3((margin + width) * MM_TO_PT);
+  const trimMaxY_pt = round3((margin + height) * MM_TO_PT);
+
+  // Nối các đoạn rời thành polyline
+  const cutLines = chainSegments(dieline.cut);
+  const creaseLines = chainSegments(dieline.crease);
+
+  // Xây dựng Content Stream
+  let streamBody = '/GS_OP gs\n'; // Kích hoạt Overprint
+  streamBody += '0.709 w\n'; // Nét dày 0.25 mm (0.709 pt)
+
+  // 1. Layer CREASE (Đường nếp cấn)
+  streamBody += '/OC /OC_CREASE BDC\n';
+  streamBody += '/CS_CREASE CS 1 SCN\n';
+  streamBody += '[8.504 5.669] 0 d\n'; // Nét đứt: 3 mm nét (8.504 pt), 2 mm hở (5.669 pt)
+
+  for (const line of creaseLines) {
+    const ops = polylineToPdfOps(line, originX, originY, totalH_mm);
+    if (ops) streamBody += `${ops}\n`;
+  }
+  streamBody += 'EMC\n';
+
+  // 2. Layer CUT (Đường dao cắt ngoài)
+  streamBody += '/OC /OC_CUT BDC\n';
+  streamBody += '/CS_CUT CS 1 SCN\n';
+  streamBody += '[] 0 d\n'; // Nét liền
+
+  for (const line of cutLines) {
+    const ops = polylineToPdfOps(line, originX, originY, totalH_mm);
+    if (ops) streamBody += `${ops}\n`;
+  }
+  streamBody += 'EMC\n';
+
+  const writer = new PdfWriter();
+
+  // Obj 1: Catalog
+  writer.addObject(
+    '<< /Type /Catalog /Pages 2 0 R /OCProperties << /OCGs [4 0 R 5 0 R] /D << /Order [4 0 R 5 0 R] /ON [4 0 R 5 0 R] >> >> >>'
+  );
+
+  // Obj 2: Pages
+  writer.addObject('<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+
+  // Obj 3: Page
+  writer.addObject(
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${totalW_pt} ${totalH_pt}] /TrimBox [${trimMinX_pt} ${trimMinY_pt} ${trimMaxX_pt} ${trimMaxY_pt}] /Resources << /Properties << /OC_CUT 4 0 R /OC_CREASE 5 0 R >> /ColorSpace << /CS_CUT 6 0 R /CS_CREASE 7 0 R >> /ExtGState << /GS_OP 8 0 R >> >> /Contents 9 0 R >>`
+  );
+
+  // Obj 4: OCG CUT
+  writer.addObject('<< /Type /OCG /Name (CUT) >>');
+
+  // Obj 5: OCG CREASE
+  writer.addObject('<< /Type /OCG /Name (CREASE) >>');
+
+  // Obj 6: Separation CUT (Magenta 100%)
+  writer.addObject(
+    '[/Separation /CUT /DeviceCMYK << /FunctionType 2 /Domain [0 1] /C0 [0 0 0 0] /C1 [0 1 0 0] /N 1 >>]'
+  );
+
+  // Obj 7: Separation CREASE (Cyan 100%)
+  writer.addObject(
+    '[/Separation /CREASE /DeviceCMYK << /FunctionType 2 /Domain [0 1] /C0 [0 0 0 0] /C1 [1 0 0 0] /N 1 >>]'
+  );
+
+  // Obj 8: ExtGState Overprint
+  writer.addObject('<< /Type /ExtGState /OP true /op true /OPM 1 >>');
+
+  // Obj 9: Content Stream
+  const streamLen = streamBody.length;
+  writer.addObject(`<< /Length ${streamLen} >>\nstream\n${streamBody}endstream`);
+
+  return writer.build();
+}

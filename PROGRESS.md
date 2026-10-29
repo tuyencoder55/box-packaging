@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P5 (xong P5.3, chuẩn bị P5.4)
+Đang ở: P5 (xong P5.4, chuẩn bị P5.5)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -39,7 +39,7 @@
   - [x] P5.1 core/chain.ts (nối đoạn rời thành polyline liền) + test
   - [x] P5.2 export/download.ts + export/svg.ts + test
   - [x] P5.3 export/dxf.ts (CAD / cắt bế CNC) + test
-  - [ ] P5.4 export/pdfWriter.ts + export/pdf.ts (layer, màu pha CUT/CREASE) + test
+  - [x] P5.4 export/pdfWriter.ts + export/pdf.ts (layer, màu pha CUT/CREASE) + test
   - [ ] P5.5 export/ai.ts (Adobe Illustrator)
   - [ ] P5.6 export/png.ts (chụp ảnh 3D)
   - [ ] P5.7 ui/app/exportModal.ts (giao diện tải đủ 5 định dạng)
@@ -88,3 +88,4 @@
 - 2026-10-29 P5.1: core/chain.ts nối các đoạn rời thành polyline liền mạch và bảo toàn chiều dài (55 tests xanh)
 - 2026-10-29 P5.2: export/download.ts + export/svg.ts xuất file SVG kỹ thuật 2 layer CUT/CREASE (56 tests xanh)
 - 2026-10-29 P5.3: export/dxf.ts xuất file DXF R12 AC1009 cho máy cắt bế CNC và CAD (57 tests xanh)
+- 2026-10-29 P5.4: export/pdfWriter.ts + pdf.ts tự viết bộ ghi PDF, 2 layer OCG, màu pha Separation CMYK và xref chuẩn byte offset (58 tests xanh)
