@@ -22,8 +22,8 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ⬜ chain.ts — nối đoạn rời thành polyline liền
 
 ## src/boxes (mỗi loại hộp một file)
-- ⬜ index.ts — danh sách đăng ký BoxDef
-- ⬜ fefco-0201.ts — thùng carton RSC
+- ✅ index.ts — danh sách đăng ký BoxDef
+- ✅ fefco-0201.ts — thùng carton RSC
 - ⬜ fefco-0427.ts — mailer cuộn mép
 - ⬜ tuck-end-straight.ts — hộp nắp gài thẳng
 - ⬜ tuck-end-reverse.ts — hộp nắp gài ngược
