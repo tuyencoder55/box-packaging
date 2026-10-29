@@ -54,3 +54,4 @@ describe('shapes', () => {
     expect(Math.round(poly[2][1])).toBe(40);
   });
 });
+
