@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: Hoàn thành P2, chuẩn bị P3 (Thêm hộp + Thư viện mẫu)
+Đang ở: P3 (xong P3.1, chuẩn bị P3.2)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -23,6 +23,12 @@
   - [x] P2.5 core/orient.ts + nút Chuẩn/Lật/Xoay
   - [x] P2.6 Lưu localStorage + trạng thái "Đã lưu", stepBar.ts
 - [ ] P3 Thêm hộp + Thư viện mẫu
+  - [x] P3.1 boxes/fefco-0427.ts (hộp mailer cuộn mép) + test
+  - [ ] P3.2 boxes/tuck-end-straight.ts + test
+  - [ ] P3.3 boxes/tuck-end-reverse.ts + test
+  - [ ] P3.4 boxes/auto-lock-bottom.ts + test
+  - [ ] P3.5 ui/templates/* + pages/templates.ts (lưới thẻ, lọc nhóm)
+  - [ ] P3.6 Nút "Dùng mẫu này" + bộ chọn loại hộp trong Studio
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
 - [ ] P4 Mockup 3D
 - [ ] P4b Màu và ảnh lên mặt hộp 3D
@@ -55,3 +61,4 @@
 - 2026-10-29 P2.4: render2d/zoomPan.ts zoom cuộn chuột, pan kéo và thanh zoom % (31 tests xanh)
 - 2026-10-29 P2.5: core/orient.ts lật/xoay khuôn và bộ chọn hướng hiển thị (36 tests xanh)
 - 2026-10-29 P2.6: lưu localStorage, trạng thái Đã lưu và ui/app/stepBar.ts (36 tests xanh) - hoàn thành Phase P2
+- 2026-10-29 P3.1: boxes/fefco-0427.ts (hộp mailer cuộn mép) và unit tests (38 tests xanh)
