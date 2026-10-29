@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: Hoàn thành Phase P4 (chuẩn bị sang P5)
+Đang ở: P5 (xong P5.1, chuẩn bị P5.2)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -35,6 +35,14 @@
   - [x] P4.3 render3d/foldAnim.ts (thanh trượt gấp/mở theo step) + test
   - [x] P4.4 ui/app/mockupCard.ts (thẻ nổi góc phải + phóng to xem 3D)
   - [x] P4.5 Kết nối vào trang app.html qua stepBar và đồng bộ thời gian thực
+- [ ] P5 Xuất file (PDF, AI, DXF bắt buộc; SVG, PNG)
+  - [x] P5.1 core/chain.ts (nối đoạn rời thành polyline liền) + test
+  - [ ] P5.2 export/download.ts + export/svg.ts
+  - [ ] P5.3 export/dxf.ts (CAD / cắt bế CNC) + test
+  - [ ] P5.4 export/pdfWriter.ts + export/pdf.ts (layer, màu pha CUT/CREASE) + test
+  - [ ] P5.5 export/ai.ts (Adobe Illustrator)
+  - [ ] P5.6 export/png.ts (chụp ảnh 3D)
+  - [ ] P5.7 ui/app/exportModal.ts (giao diện tải đủ 5 định dạng)
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
 - [ ] P4 Mockup 3D
 - [ ] P4b Màu và ảnh lên mặt hộp 3D
@@ -77,3 +85,4 @@
 - 2026-10-29 P4.2: render3d/foldModel.ts dựng cây bản lề THREE.Group lồng nhau cho hộp 3D (49 tests xanh)
 - 2026-10-29 P4.3: render3d/foldAnim.ts hoạt hoạ gấp/mở theo step và thanh trượt tiến độ (52 tests xanh)
 - 2026-10-29 P4.4 & P4.5: ui/app/mockupCard.ts thẻ nổi 3D, tích hợp stepBar chuyển đổi dieline 2D/3D toàn màn hình, hoàn thành Phase P4 (52 tests xanh)
+- 2026-10-29 P5.1: core/chain.ts nối các đoạn rời thành polyline liền mạch và bảo toàn chiều dài (55 tests xanh)

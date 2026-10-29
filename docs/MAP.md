@@ -19,7 +19,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ dieline.ts — toạ độ phẳng → đường cắt/cấn
 - ✅ orient.ts — lật/xoay khuôn
 - ✅ thickness.ts — lòng↔phủ bì, bù độ dày giấy
-- ⬜ chain.ts — nối đoạn rời thành polyline liền
+- ✅ chain.ts — nối đoạn rời thành polyline liền
 
 ## src/boxes (mỗi loại hộp một file)
 - ✅ index.ts — danh sách đăng ký BoxDef
