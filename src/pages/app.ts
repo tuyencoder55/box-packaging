@@ -172,6 +172,7 @@ function initStudio() {
   function switchStep(newStep: StepId) {
     if (newStep === 'mockup') {
       if (viewport) viewport.style.display = 'none';
+      if (paramContainer) paramContainer.style.display = 'none';
       if (mockupContainer) {
         mockupContainer.style.display = 'flex';
         mockupContainer.style.flexDirection = 'column';
@@ -182,6 +183,7 @@ function initStudio() {
       mockupController?.setMode('fullscreen');
     } else if (newStep === 'dieline') {
       if (viewport) viewport.style.display = 'flex';
+      if (paramContainer) paramContainer.style.display = 'flex';
       if (mockupContainer) {
         mockupContainer.style.display = 'block';
         mockupContainer.style.flex = 'none';
@@ -276,7 +278,7 @@ function initStudio() {
     const dieline = buildDieline(layouts);
     const orientedDieline = transformDieline(dieline, s.orient);
     currentDieline = orientedDieline;
-    const dimLines = buildDimensionLines(boxDef.dims, layouts, { l: s.l, w: s.w, h: s.h }, s.unit);
+    const dimLines = buildDimensionLines(boxDef.dims, layouts, { l: s.l, w: s.w, h: s.h, t: s.t, opts: s.opts }, s.unit, boxDef.id);
     currentDimLines = dimLines;
 
     if (viewport) {

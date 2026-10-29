@@ -28,14 +28,48 @@ export function segsToPathData(segs: Seg[]): string {
 }
 
 /**
- * Tính toán dữ liệu SVG (viewBox có lề padding, path cắt, path cấn)
+ * Tính toán dữ liệu SVG (viewBox có lề padding tự động chứa cả các chuỗi kích thước CAD)
  */
-export function dielineToSvgData(dieline: Dieline, pad = 25): SvgViewData {
-  const [minX, minY, w, h] = dieline.bbox;
-  const vx = minX - pad;
-  const vy = minY - pad;
-  const vw = Math.max(1, w + pad * 2);
-  const vh = Math.max(1, h + pad * 2);
+export function dielineToSvgData(dieline: Dieline, pad = 25, dimLines: DimensionLine[] = []): SvgViewData {
+  let minX = dieline.bbox[0];
+  let minY = dieline.bbox[1];
+  let maxX = dieline.bbox[0] + dieline.bbox[2];
+  let maxY = dieline.bbox[1] + dieline.bbox[3];
+
+  if (dimLines.length === 0) {
+    const vx = minX - pad;
+    const vy = minY - pad;
+    const vw = Math.max(1, dieline.bbox[2] + pad * 2);
+    const vh = Math.max(1, dieline.bbox[3] + pad * 2);
+
+    return {
+      cutPath: segsToPathData(dieline.cut),
+      creasePath: segsToPathData(dieline.crease),
+      viewBox: `${vx} ${vy} ${vw} ${vh}`,
+    };
+  }
+
+  for (const d of dimLines) {
+    if (d.start[0] < minX) minX = d.start[0];
+    if (d.start[1] < minY) minY = d.start[1];
+    if (d.start[0] > maxX) maxX = d.start[0];
+    if (d.start[1] > maxY) maxY = d.start[1];
+
+    if (d.end[0] < minX) minX = d.end[0];
+    if (d.end[1] < minY) minY = d.end[1];
+    if (d.end[0] > maxX) maxX = d.end[0];
+    if (d.end[1] > maxY) maxY = d.end[1];
+  }
+
+  const padLeft = Math.max(pad, 20);
+  const padRight = Math.max(pad, 30);
+  const padTop = Math.max(pad, 30);
+  const padBottom = Math.max(pad, 20);
+
+  const vx = minX - padLeft;
+  const vy = minY - padTop;
+  const vw = Math.max(1, maxX - minX + padLeft + padRight);
+  const vh = Math.max(1, maxY - minY + padTop + padBottom);
 
   return {
     cutPath: segsToPathData(dieline.cut),
@@ -59,7 +93,7 @@ export function renderSvgView(
   const dimFont = styles.dimFont || 'Inter, sans-serif';
   const dimFontSize = styles.dimFontSize || 11;
 
-  const { cutPath, creasePath, viewBox } = dielineToSvgData(dieline);
+  const { cutPath, creasePath, viewBox } = dielineToSvgData(dieline, 25, dimLines);
 
   let svg = container.querySelector<SVGSVGElement>('svg.dieline-svg');
 
@@ -142,22 +176,25 @@ export function renderSvgView(
       line.setAttribute('stroke', dimColor);
       line.setAttribute('stroke-width', '0.8');
 
-      const text = document.createElementNS(svgNs, 'text');
-      text.setAttribute('x', String(d.mid[0]));
-      text.setAttribute('y', String(d.mid[1]));
-      text.setAttribute('fill', dimColor);
-      text.setAttribute('font-family', dimFont);
-      text.setAttribute('font-size', String(dimFontSize));
-      text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('paint-order', 'stroke');
-      text.setAttribute('stroke', '#181b22');
-      text.setAttribute('stroke-width', '3px');
-      text.setAttribute('stroke-linejoin', 'round');
-      text.setAttribute('font-weight', '600');
-      text.textContent = d.label;
-
       dimsLayer.appendChild(line);
-      dimsLayer.appendChild(text);
+
+      if (d.label && d.label.trim()) {
+        const text = document.createElementNS(svgNs, 'text');
+        text.setAttribute('x', String(d.mid[0]));
+        text.setAttribute('y', String(d.mid[1]));
+        text.setAttribute('fill', dimColor);
+        text.setAttribute('font-family', dimFont);
+        text.setAttribute('font-size', String(dimFontSize));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.setAttribute('paint-order', 'stroke');
+        text.setAttribute('stroke', '#181b22');
+        text.setAttribute('stroke-width', '3px');
+        text.setAttribute('stroke-linejoin', 'round');
+        text.setAttribute('font-weight', '700');
+        text.textContent = d.label;
+        dimsLayer.appendChild(text);
+      }
     }
   }
 

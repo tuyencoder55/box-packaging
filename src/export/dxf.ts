@@ -15,10 +15,26 @@ export function generateDxfContent(
   margin: number = 5,
   dimLines: DimensionLine[] = []
 ): string {
-  const [minX, minY, , height] = dieline.bbox;
-  const originX = minX - margin;
-  const originY = minY - margin;
-  const totalH = height + margin * 2;
+  let bMinX = dieline.bbox[0];
+  let bMinY = dieline.bbox[1];
+  let bMaxX = dieline.bbox[0] + dieline.bbox[2];
+  let bMaxY = dieline.bbox[1] + dieline.bbox[3];
+
+  for (const d of dimLines) {
+    if (d.start[0] < bMinX) bMinX = d.start[0];
+    if (d.start[1] < bMinY) bMinY = d.start[1];
+    if (d.start[0] > bMaxX) bMaxX = d.start[0];
+    if (d.start[1] > bMaxY) bMaxY = d.start[1];
+
+    if (d.end[0] < bMinX) bMinX = d.end[0];
+    if (d.end[1] < bMinY) bMinY = d.end[1];
+    if (d.end[0] > bMaxX) bMaxX = d.end[0];
+    if (d.end[1] > bMaxY) bMaxY = d.end[1];
+  }
+
+  const originX = bMinX - margin;
+  const originY = bMinY - margin;
+  const totalH = bMaxY - bMinY + margin * 2;
 
   // Nối các đoạn rời thành polyline
   const cutLines = chainSegments(dieline.cut);
@@ -114,19 +130,21 @@ export function generateDxfContent(
     );
 
     // Chữ số đo kích thước (Text cao 3.5mm chuẩn bản vẽ kỹ thuật CAD)
-    lines.push(
-      '0', 'TEXT',
-      '8', 'DIMENSION',
-      '10', xm.toString(),
-      '20', ym.toString(),
-      '30', '0.0',
-      '40', '3.5',
-      '1', dim.label,
-      '72', '1', // Căn giữa Center (horizontal)
-      '11', xm.toString(),
-      '21', ym.toString(),
-      '31', '0.0'
-    );
+    if (dim.label && dim.label.trim()) {
+      lines.push(
+        '0', 'TEXT',
+        '8', 'DIMENSION',
+        '10', xm.toString(),
+        '20', ym.toString(),
+        '30', '0.0',
+        '40', '3.5',
+        '1', dim.label,
+        '72', '1', // Căn giữa Center (horizontal)
+        '11', xm.toString(),
+        '21', ym.toString(),
+        '31', '0.0'
+      );
+    }
   }
 
   lines.push('0', 'ENDSEC');

@@ -14,9 +14,17 @@ export interface PanelHingeInfo {
   step: number;
 }
 
+export interface FoldModelOptions {
+  paperColor?: string | number;
+  paperTexture?: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc';
+}
+
 export interface FoldModelResult {
   rootGroup: THREE.Group;
   hinges: Map<string, PanelHingeInfo>;
+  outerMaterial: THREE.MeshStandardMaterial;
+  setPaperColor: (color: string | number) => void;
+  setPaperTexture: (type: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc') => void;
   dispose: () => void;
 }
 
@@ -43,20 +51,51 @@ function createPanelShape(poly: Pt[], originX: number, originY: number): THREE.S
   return shape;
 }
 
-export function buildFoldModel(panels: LayoutPanel[]): FoldModelResult {
+export function buildFoldModel(panels: LayoutPanel[], options?: FoldModelOptions): FoldModelResult {
   const rootGroup = new THREE.Group();
   const hinges = new Map<string, PanelHingeInfo>();
   const geometries: THREE.BufferGeometry[] = [];
   const materials: THREE.Material[] = [];
 
   // Tạo vật liệu mặt giấy carton tự nhiên
+  const initialColor = options?.paperColor ?? 0xc8a882;
   const outerMat = new THREE.MeshStandardMaterial({
-    color: 0xdfd3c3, // Giấy kraft sáng
-    roughness: 0.8,
+    color: initialColor, // Giấy kraft chuẩn bao bì
+    roughness: 0.85,
     metalness: 0.05,
     side: THREE.DoubleSide,
   });
   materials.push(outerMat);
+
+  const setPaperColor = (color: string | number) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    outerMat.color.set(color as any);
+  };
+
+  const setPaperTexture = (type: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc') => {
+    switch (type) {
+      case 'ivory':
+        outerMat.roughness = 0.35;
+        outerMat.metalness = 0.02;
+        break;
+      case 'flute_e':
+        outerMat.roughness = 0.78;
+        outerMat.metalness = 0.05;
+        break;
+      case 'flute_b':
+        outerMat.roughness = 0.88;
+        outerMat.metalness = 0.05;
+        break;
+      case 'flute_bc':
+        outerMat.roughness = 0.96;
+        outerMat.metalness = 0.08;
+        break;
+    }
+  };
+
+  if (options?.paperTexture) {
+    setPaperTexture(options.paperTexture);
+  }
 
   // 1. Tính toán điểm gốc bản lề (hinge position) trong tọa độ phẳng cho từng panel
   const hingeOrigins = new Map<string, [number, number]>();
@@ -198,6 +237,9 @@ export function buildFoldModel(panels: LayoutPanel[]): FoldModelResult {
   return {
     rootGroup,
     hinges,
+    outerMaterial: outerMat,
+    setPaperColor,
+    setPaperTexture,
     dispose,
   };
 }

@@ -42,19 +42,35 @@ export function generatePdfContent(
   margin: number = 5,
   dimLines: DimensionLine[] = []
 ): string {
-  const [minX, minY, width, height] = dieline.bbox;
-  const originX = minX - margin;
-  const originY = minY - margin;
-  const totalW_mm = width + margin * 2;
-  const totalH_mm = height + margin * 2;
+  let bMinX = dieline.bbox[0];
+  let bMinY = dieline.bbox[1];
+  let bMaxX = dieline.bbox[0] + dieline.bbox[2];
+  let bMaxY = dieline.bbox[1] + dieline.bbox[3];
+
+  for (const d of dimLines) {
+    if (d.start[0] < bMinX) bMinX = d.start[0];
+    if (d.start[1] < bMinY) bMinY = d.start[1];
+    if (d.start[0] > bMaxX) bMaxX = d.start[0];
+    if (d.start[1] > bMaxY) bMaxY = d.start[1];
+
+    if (d.end[0] < bMinX) bMinX = d.end[0];
+    if (d.end[1] < bMinY) bMinY = d.end[1];
+    if (d.end[0] > bMaxX) bMaxX = d.end[0];
+    if (d.end[1] > bMaxY) bMaxY = d.end[1];
+  }
+
+  const originX = bMinX - margin;
+  const originY = bMinY - margin;
+  const totalW_mm = bMaxX - bMinX + margin * 2;
+  const totalH_mm = bMaxY - bMinY + margin * 2;
 
   const totalW_pt = round3(totalW_mm * MM_TO_PT);
   const totalH_pt = round3(totalH_mm * MM_TO_PT);
 
   const trimMinX_pt = round3(margin * MM_TO_PT);
   const trimMinY_pt = round3(margin * MM_TO_PT);
-  const trimMaxX_pt = round3((margin + width) * MM_TO_PT);
-  const trimMaxY_pt = round3((margin + height) * MM_TO_PT);
+  const trimMaxX_pt = round3((margin + dieline.bbox[2]) * MM_TO_PT);
+  const trimMaxY_pt = round3((margin + dieline.bbox[3]) * MM_TO_PT);
 
   // Nối các đoạn rời thành polyline
   const cutLines = chainSegments(dieline.cut);
@@ -103,7 +119,9 @@ export function generatePdfContent(
       const ym = round3((totalH_mm - (d.mid[1] - originY)) * MM_TO_PT);
 
       streamBody += `${x1} ${y1} m ${x2} ${y2} l S\n`;
-      streamBody += `BT /F1 8 Tf 1 0 0 1 ${xm} ${ym} Tm (${d.label}) Tj ET\n`;
+      if (d.label && d.label.trim()) {
+        streamBody += `BT /F1 8 Tf 1 0 0 1 ${xm} ${ym} Tm (${d.label}) Tj ET\n`;
+      }
     }
     streamBody += 'EMC\n';
   }

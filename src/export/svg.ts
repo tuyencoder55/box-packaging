@@ -33,13 +33,28 @@ export function generateSvgContent(
   margin: number = 5,
   dimLines: DimensionLine[] = []
 ): string {
-  const [minX, minY, width, height] = dieline.bbox;
+  let bMinX = dieline.bbox[0];
+  let bMinY = dieline.bbox[1];
+  let bMaxX = dieline.bbox[0] + dieline.bbox[2];
+  let bMaxY = dieline.bbox[1] + dieline.bbox[3];
 
-  // Lề quanh khuôn bế
-  const originX = minX - margin;
-  const originY = minY - margin;
-  const totalW = round3(width + margin * 2);
-  const totalH = round3(height + margin * 2);
+  for (const d of dimLines) {
+    if (d.start[0] < bMinX) bMinX = d.start[0];
+    if (d.start[1] < bMinY) bMinY = d.start[1];
+    if (d.start[0] > bMaxX) bMaxX = d.start[0];
+    if (d.start[1] > bMaxY) bMaxY = d.start[1];
+
+    if (d.end[0] < bMinX) bMinX = d.end[0];
+    if (d.end[1] < bMinY) bMinY = d.end[1];
+    if (d.end[0] > bMaxX) bMaxX = d.end[0];
+    if (d.end[1] > bMaxY) bMaxY = d.end[1];
+  }
+
+  // Lề quanh khuôn bế và đường kích thước
+  const originX = bMinX - margin;
+  const originY = bMinY - margin;
+  const totalW = round3(bMaxX - bMinX + margin * 2);
+  const totalH = round3(bMaxY - bMinY + margin * 2);
 
   // Nối các đoạn rời thành polyline liền
   const cutLines = chainSegments(dieline.cut);
@@ -65,7 +80,9 @@ export function generateSvgContent(
       const ym = round3(d.mid[1] - originY);
 
       dimParts.push(`    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`);
-      dimParts.push(`    <text x="${xm}" y="${ym}" text-anchor="middle">${d.label}</text>`);
+      if (d.label && d.label.trim()) {
+        dimParts.push(`    <text x="${xm}" y="${ym}" text-anchor="middle">${d.label}</text>`);
+      }
     }
     dimElements = `  <!-- Layer DIMENSION (Đường đo và nhãn kích thước) -->
   <g id="DIMENSION" fill="#666666" stroke="#888888" stroke-width="0.2" font-size="3" font-family="Arial, sans-serif">

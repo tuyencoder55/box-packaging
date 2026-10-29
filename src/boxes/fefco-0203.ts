@@ -1,5 +1,5 @@
 // Định nghĩa loại hộp: Thùng carton nắp chồm FEFCO 0203 (Full Overlap Container - FOL)
-import { chamfer } from '../core/shapes';
+import { trapezoid } from '../core/shapes';
 import type { BoxDef, BoxParams, PanelNode } from '../core/types';
 
 export const fefco0203: BoxDef = {
@@ -18,7 +18,7 @@ export const fefco0203: BoxDef = {
       key: 'glueWidth',
       label: 'Rộng lưỡi dán',
       type: 'number',
-      default: 30,
+      default: 35,
       min: 20,
       max: 50,
     },
@@ -39,7 +39,7 @@ export const fefco0203: BoxDef = {
 
   build(p: BoxParams): PanelNode[] {
     const { l, w, h, t } = p;
-    const g = Number(p.opts?.glueWidth ?? 30);
+    const g = Number(p.opts?.glueWidth ?? 35);
     // Độ rộng rãnh xẻ nắp: mặc định 6mm cho sóng mỏng (<=3mm), 8mm cho sóng dày (>3mm)
     const defaultSlot = t > 3 ? 8 : 6;
     const s = Math.max(0, Number(p.opts?.slotWidth ?? defaultSlot));
@@ -58,17 +58,17 @@ export const fefco0203: BoxDef = {
       label: 'Mặt trước (A)',
     });
 
-    // Lưỡi dán gắn cạnh left của A, vát 2 góc xa cạnh gấp 5 mm
+    // Lưỡi dán (tai dán) gắn cạnh left của A, hình thang vát góc 15° chuẩn carton
     nodes.push({
       id: 'glue',
       parent: 'panel-a',
       edge: 'left',
       len: h,
       depth: g,
-      shape: chamfer(h, g, 5, 5),
+      shape: trapezoid(h, g, 8, 8),
       fold: 90,
       step: 1,
-      label: 'Lưỡi dán',
+      label: 'Tai dán',
       glue: true,
     });
 

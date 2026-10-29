@@ -13,6 +13,10 @@ export interface Scene3DContext {
   resetView: () => void;
   setDragMode: (mode: 'orbit' | 'pan') => void;
   getDragMode: () => 'orbit' | 'pan';
+  setAmbientIntensity: (val: number) => void;
+  setDirectionalIntensity: (val: number) => void;
+  getAmbientIntensity: () => number;
+  getDirectionalIntensity: () => number;
 }
 
 /**
@@ -69,7 +73,21 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
   scene.add(rootGroup);
 
   // Hệ thống ánh sáng
-  setupSceneLights(scene);
+  const lights = setupSceneLights(scene);
+
+  const setAmbientIntensity = (val: number) => {
+    lights.ambient.intensity = val;
+    render();
+  };
+
+  const setDirectionalIntensity = (val: number) => {
+    lights.dir1.intensity = val;
+    lights.dir2.intensity = val * 0.25;
+    render();
+  };
+
+  const getAmbientIntensity = () => lights.ambient.intensity;
+  const getDirectionalIntensity = () => lights.dir1.intensity;
 
   // Điều khiển chuột & cảm ứng: Xoay tự do (Orbit), Cầm nắm di chuyển (Pan), Phóng to/thu nhỏ (Zoom)
   let isDragging = false;
@@ -290,5 +308,9 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
     resetView,
     setDragMode,
     getDragMode,
+    setAmbientIntensity,
+    setDirectionalIntensity,
+    getAmbientIntensity,
+    getDirectionalIntensity,
   };
 }

@@ -47,3 +47,23 @@ export function formatUnit(val: number, unit: Unit, decimals = 1): string {
   return `${rounded} ${unit}`;
 }
 
+/**
+ * Định dạng số kích thước chuẩn CAD bản vẽ kỹ thuật (ví dụ: "2,035", "600", "35")
+ */
+export function formatDimValue(valMm: number, unit: Unit): string {
+  const converted = mmToUnit(valMm, unit);
+  if (unit === 'mm') {
+    const rounded = Math.round(converted);
+    if (Math.abs(converted - rounded) < 0.05) {
+      return rounded.toLocaleString('en-US');
+    }
+    return converted.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  } else if (unit === 'cm') {
+    const rounded = Math.round(converted * 10) / 10;
+    return `${rounded}`;
+  } else {
+    const rounded = Math.round(converted * 100) / 100;
+    return `${rounded}"`;
+  }
+}
+

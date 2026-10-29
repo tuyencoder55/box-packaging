@@ -21,6 +21,10 @@ export interface AppDocState {
   dimColor?: string;
   cutColor?: string;
   creaseColor?: string;
+  paperColor?: string;
+  paperTexture?: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc';
+  ambientLight?: number;
+  dirLight?: number;
 }
 
 function createCard(titleText?: string): HTMLElement {
