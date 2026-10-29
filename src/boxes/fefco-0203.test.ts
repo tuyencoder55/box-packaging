@@ -45,13 +45,14 @@ describe('fefco-0203', () => {
     expect(dieline.bbox).toEqual([-30, -200, 1030, 550]);
   });
 
-  it('cánh nắp chính A và C có depth bằng chiều rộng W', () => {
+  it('cánh nắp chính A và C có depth bằng chiều rộng W và có rãnh xẻ slot', () => {
+    const slotWidth = 8;
     const nodes = fefco0203.build({
       l: 250,
       w: 180,
       h: 120,
-      t: 3,
-      opts: {},
+      t: 5,
+      opts: { slotWidth },
     });
 
     const topA = nodes.find((n) => n.id === 'top-flap-a');
@@ -61,5 +62,10 @@ describe('fefco-0203', () => {
     expect(topA?.depth).toBe(180);
     expect(topC?.depth).toBe(180);
     expect(topB?.depth).toBe(90); // tai phụ = W/2
+
+    // Kiểm tra rãnh xẻ slot
+    expect(topA?.len).toBe(250 - slotWidth / 2);
+    expect(topB?.offset).toBe(slotWidth / 2);
+    expect(topB?.len).toBe(180 - slotWidth);
   });
 });

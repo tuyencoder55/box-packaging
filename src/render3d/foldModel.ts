@@ -130,22 +130,22 @@ export function buildFoldModel(panels: LayoutPanel[]): FoldModelResult {
     }
 
     // Xác định trục xoay và hướng xoay (sign)
-    // fold 90° nghĩa là gập về phía sau (-Z)
+    // Quy ước chuẩn: fold > 0 gập vào trong (về phía sau -Z của mặt giấy)
     let axis: 'x' | 'y' = 'y';
     let sign = 1;
 
     if (p.node.edge === 'top') {
       axis = 'x';
-      sign = 1; // Xoay quanh trục X
+      sign = -1; // Cạnh trên: xoay quanh X gập vào trong (-Z)
     } else if (p.node.edge === 'bottom') {
       axis = 'x';
-      sign = -1;
+      sign = 1; // Cạnh dưới: xoay quanh X gập vào trong (-Z)
     } else if (p.node.edge === 'left') {
       axis = 'y';
-      sign = -1;
+      sign = -1; // Cạnh trái: xoay quanh Y gập vào trong (-Z)
     } else if (p.node.edge === 'right') {
       axis = 'y';
-      sign = 1;
+      sign = 1; // Cạnh phải: xoay quanh Y gập vào trong (-Z)
     }
 
     const maxAngleRad = ((p.node.fold ?? 90) * Math.PI) / 180;

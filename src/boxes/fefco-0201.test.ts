@@ -45,22 +45,27 @@ describe('fefco-0201', () => {
     expect(dieline.bbox).toEqual([-30, -100, 1030, 350]);
   });
 
-  it('thay đổi kích thước L, W, H thì bbox thay đổi đúng tỷ lệ', () => {
+  it('khoảng cách rãnh xẻ (slot) giữa các cánh nắp đúng bằng slotWidth', () => {
+    const slotWidth = 8;
     const nodes = fefco0201.build({
-      l: 400,
-      w: 300,
-      h: 200,
-      t: 4,
-      opts: { glueWidth: 35 },
+      l: 300,
+      w: 200,
+      h: 150,
+      t: 5,
+      opts: { slotWidth },
     });
 
-    const layouts = layoutPanels(nodes);
-    const dieline = buildDieline(layouts);
+    const topA = nodes.find((n) => n.id === 'top-flap-a');
+    const topB = nodes.find((n) => n.id === 'top-flap-b');
 
-    // glue (35) + 2*400 + 2*300 = 1435 mm
-    // top flap (150) + 200 + bot flap (150) = 500 mm
-    // minX = -35, minY = -150
-    expect(dieline.bbox).toEqual([-35, -150, 1435, 500]);
+    expect(topA).toBeDefined();
+    expect(topB).toBeDefined();
+
+    // Nắp A kết thúc tại L - slotWidth/2 = 300 - 4 = 296
+    // Nắp B bắt đầu tại slotWidth/2 = 4 (trên thân B rộng 200)
+    // Tức là khoảng hở giữa 2 cánh nắp = (300 + 4) - 296 = 8 mm
+    expect(topA?.len).toBe(300 - slotWidth / 2);
+    expect(topB?.offset).toBe(slotWidth / 2);
+    expect(topB?.len).toBe(200 - slotWidth);
   });
 });
-

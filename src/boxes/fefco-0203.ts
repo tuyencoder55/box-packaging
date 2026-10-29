@@ -22,6 +22,14 @@ export const fefco0203: BoxDef = {
       min: 20,
       max: 50,
     },
+    {
+      key: 'slotWidth',
+      label: 'Độ rộng rãnh xẻ (Slot)',
+      type: 'number',
+      default: 6,
+      min: 0,
+      max: 15,
+    },
   ],
   dims: [
     { panelId: 'panel-a', axis: 'u', param: 'l' },
@@ -30,13 +38,16 @@ export const fefco0203: BoxDef = {
   ],
 
   build(p: BoxParams): PanelNode[] {
-    const { l, w, h } = p;
+    const { l, w, h, t } = p;
     const g = Number(p.opts?.glueWidth ?? 30);
+    // Độ rộng rãnh xẻ nắp: mặc định 6mm cho sóng mỏng (<=3mm), 8mm cho sóng dày (>3mm)
+    const defaultSlot = t > 3 ? 8 : 6;
+    const s = Math.max(0, Number(p.opts?.slotWidth ?? defaultSlot));
+    const halfS = s / 2;
 
     const nodes: PanelNode[] = [];
 
     // 1. Thân hộp (chuỗi ngang từ trái sang phải: glue -> A -> B -> C -> D)
-    // Panel A (mặt trước) là panel gốc (parent: null), đặt tại (0,0)
     nodes.push({
       id: 'panel-a',
       parent: null,
@@ -97,19 +108,14 @@ export const fefco0203: BoxDef = {
       label: 'Mặt hông (D)',
     });
 
-    // 2. Nắp trên (top flaps) & nắp dưới (bottom flaps)
-    // Nắp chồm FEFCO 0203:
-    // Cánh chính A và C có chiều sâu phủ kín toàn bộ chiều rộng W (chồm lên nhau)
-    // Cánh phụ B và D (lót trong) có chiều sâu w / 2 để lót bên dưới
-    // Thứ tự gấp:
-    // Tai lót B và D gấp trước (step 2)
-    // Cánh A gấp vào (step 3)
-    // Cánh C gấp chồm lên trên cánh A (step 4)
+    // 2. Nắp trên (top flaps) & nắp dưới (bottom flaps) có khe rãnh xẻ (Slot)
+    // Cánh chính A và C có depth = W (nắp chồm)
+    // Cánh phụ B và D có depth = W / 2 (lót trong)
     const flapsConfig = [
-      { id: 'b', parentId: 'panel-b', len: w, depth: w / 2, step: 2, label: 'B' },
-      { id: 'd', parentId: 'panel-d', len: w, depth: w / 2, step: 2, label: 'D' },
-      { id: 'a', parentId: 'panel-a', len: l, depth: w, step: 3, label: 'A (Chồm)' },
-      { id: 'c', parentId: 'panel-c', len: l, depth: w, step: 4, label: 'C (Chồm)' },
+      { id: 'b', parentId: 'panel-b', offset: halfS, len: Math.max(10, w - s), depth: w / 2, step: 2, label: 'B' },
+      { id: 'd', parentId: 'panel-d', offset: halfS, len: Math.max(10, w - s), depth: w / 2, step: 2, label: 'D' },
+      { id: 'a', parentId: 'panel-a', offset: 0, len: Math.max(10, l - halfS), depth: w, step: 3, label: 'A (Chồm)' },
+      { id: 'c', parentId: 'panel-c', offset: halfS, len: Math.max(10, l - s), depth: w, step: 4, label: 'C (Chồm)' },
     ];
 
     for (const f of flapsConfig) {
@@ -119,6 +125,7 @@ export const fefco0203: BoxDef = {
         edge: 'top',
         len: f.len,
         depth: f.depth,
+        offset: f.offset,
         fold: 90,
         step: f.step,
         label: `Nắp trên ${f.label}`,
@@ -130,6 +137,7 @@ export const fefco0203: BoxDef = {
         edge: 'bottom',
         len: f.len,
         depth: f.depth,
+        offset: f.offset,
         fold: 90,
         step: f.step,
         label: `Nắp dưới ${f.label}`,
