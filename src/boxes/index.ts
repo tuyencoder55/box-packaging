@@ -1,6 +1,7 @@
 // Danh sách đăng ký các loại hộp (BoxDef Registry)
 import { fefco0201 } from './fefco-0201';
 import { fefco0427 } from './fefco-0427';
+import { tuckEndReverse } from './tuck-end-reverse';
 import { tuckEndStraight } from './tuck-end-straight';
 import type { BoxDef } from '../core/types';
 
@@ -8,6 +9,7 @@ export const BOX_REGISTRY: Record<string, BoxDef> = {
   'fefco-0201': fefco0201,
   'fefco-0427': fefco0427,
   'tuck-end-straight': tuckEndStraight,
+  'tuck-end-reverse': tuckEndReverse,
 };
 
 /**

@@ -26,7 +26,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ fefco-0201.ts — thùng carton RSC
 - ✅ fefco-0427.ts — mailer cuộn mép
 - ✅ tuck-end-straight.ts — hộp nắp gài thẳng
-- ⬜ tuck-end-reverse.ts — hộp nắp gài ngược
+- ✅ tuck-end-reverse.ts — hộp nắp gài ngược
 - ⬜ auto-lock-bottom.ts — hộp đáy khoá tự động
 
 - ⬜ parts/*.ts — bộ phận dùng chung giữa các hộp (tuckLid, dustFlap, autoLockBottom, glueFlap…), mỗi file một bộ phận

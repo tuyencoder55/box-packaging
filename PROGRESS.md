@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P3 (xong P3.2, chuẩn bị P3.3)
+Đang ở: P3 (xong P3.3, chuẩn bị P3.4)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -25,7 +25,7 @@
 - [ ] P3 Thêm hộp + Thư viện mẫu
   - [x] P3.1 boxes/fefco-0427.ts (hộp mailer cuộn mép) + test
   - [x] P3.2 boxes/tuck-end-straight.ts + test
-  - [ ] P3.3 boxes/tuck-end-reverse.ts + test
+  - [x] P3.3 boxes/tuck-end-reverse.ts + test
   - [ ] P3.4 boxes/auto-lock-bottom.ts + test
   - [ ] P3.5 ui/templates/* + pages/templates.ts (lưới thẻ, lọc nhóm)
   - [ ] P3.6 Nút "Dùng mẫu này" + bộ chọn loại hộp trong Studio
@@ -63,3 +63,4 @@
 - 2026-10-29 P2.6: lưu localStorage, trạng thái Đã lưu và ui/app/stepBar.ts (36 tests xanh) - hoàn thành Phase P2
 - 2026-10-29 P3.1: boxes/fefco-0427.ts (hộp mailer cuộn mép) và unit tests (38 tests xanh)
 - 2026-10-29 P3.2: boxes/tuck-end-straight.ts (hộp nắp gài thẳng STE) và unit tests (40 tests xanh)
+- 2026-10-29 P3.3: boxes/tuck-end-reverse.ts (hộp nắp gài ngược RTE) và unit tests (43 tests xanh)
