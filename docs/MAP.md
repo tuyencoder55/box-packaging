@@ -50,7 +50,8 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ dom.ts — helper tạo DOM el()
 - ✅ app/paramPanel.ts — panel tham số bên trái
 - ✅ app/legend.ts — bảng chú giải dao cắt/cấn
-- ⬜ app/stepBar.ts · mockupCard.ts · exportModal.ts
+- ✅ app/stepBar.ts — thanh chuyển 3 bước Dieline/3D/Xuất
+- ⬜ app/mockupCard.ts · exportModal.ts
 - ⬜ templates/cardGrid.ts · filterBar.ts · detailModal.ts
 
 ## src/pages
