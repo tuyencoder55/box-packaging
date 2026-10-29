@@ -32,7 +32,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ⬜ parts/*.ts — bộ phận dùng chung giữa các hộp (tuckLid, dustFlap, autoLockBottom, glueFlap…), mỗi file một bộ phận
 
 ## src/render2d
-- ⬜ svgView.ts — vẽ khuôn SVG
+- ✅ svgView.ts — vẽ khuôn SVG
 - ⬜ dimensions.ts — đường kích thước + nhãn
 - ⬜ zoomPan.ts — zoom, kéo
 

@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P1 (xong P1.4, chuẩn bị P1.5)
+Đang ở: Hoàn thành P1, chuẩn bị P2 (Studio 2D hoàn chỉnh)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -9,12 +9,12 @@
   - [x] P0.3 styles/tokens.css + base.css (nền #1d2027, xanh bạc hà, font Inter)
   - [x] P0.4 core/types.ts, core/units.ts, core/store.ts + test
   - [x] P0.5 Đồng bộ docs/MAP.md
-- [ ] P1 Lõi khuôn (fefco-0201)
+- [x] P1 Lõi khuôn (fefco-0201)
   - [x] P1.1 core/shapes.ts (rect, chamfer, rounded) + test
   - [x] P1.2 core/layout.ts (cây panel → toạ độ phẳng) + test
   - [x] P1.3 core/dieline.ts (phân loại đường cắt/cấn) + test
   - [x] P1.4 boxes/fefco-0201.ts + boxes/index.ts + test
-  - [ ] P1.5 render2d/svgView.ts vẽ khuôn vào app.html + fit khung
+  - [x] P1.5 render2d/svgView.ts vẽ khuôn vào app.html + fit khung
 - [ ] P2 Studio 2D
 - [ ] P3 Thêm hộp + Thư viện mẫu
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
@@ -42,3 +42,4 @@
 - 2026-10-29 P1.2: core/layout.ts (bố cục cây panel phẳng 2D) và unit tests (19 tests xanh)
 - 2026-10-29 P1.3: core/dieline.ts (phân loại đường cắt/cấn, khử trùng lặp, tính bbox) và unit tests (22 tests xanh)
 - 2026-10-29 P1.4: boxes/fefco-0201.ts và boxes/index.ts registry + unit tests (25 tests xanh)
+- 2026-10-29 P1.5: render2d/svgView.ts vẽ khuôn SVG vào app.html (27 tests xanh) và hoàn thành toàn bộ Phase P1
