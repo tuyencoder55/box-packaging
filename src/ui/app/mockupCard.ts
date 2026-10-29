@@ -6,6 +6,7 @@ import { calcEffectiveParams } from '../../core/thickness';
 import type { BoxDef } from '../../core/types';
 import { createFoldAnimator, type FoldAnimator } from '../../render3d/foldAnim';
 import { buildFoldModel, type FoldModelResult } from '../../render3d/foldModel';
+import { FLUTE_SPECS, type FluteType } from '../../render3d/fluteAssets';
 import { calcCameraDistance, create3DScene, type Scene3DContext } from '../../render3d/scene';
 import { el } from '../dom';
 import type { AppDocState } from './paramPanel';
@@ -174,6 +175,16 @@ export function initMockupCard(
   floatBar.appendChild(btnResetCenter);
   canvasWrap.appendChild(floatBar);
 
+  // Khởi tạo Scene Three.js
+  const sceneCtx: Scene3DContext = create3DScene(canvasWrap);
+  let currentModel: FoldModelResult | null = null;
+  let animator: FoldAnimator | null = null;
+  let currentBoxDef = initialBox;
+
+  // Áp dụng độ sáng ban đầu
+  if (store.get().ambientLight) sceneCtx.setAmbientIntensity(store.get().ambientLight!);
+  if (store.get().dirLight) sceneCtx.setDirectionalIntensity(store.get().dirLight!);
+
   // Thanh điều khiển gập mở bên dưới khung 3D
   const controlsBar = el('div', {
     style: `
@@ -237,6 +248,40 @@ export function initMockupCard(
   });
   contentBody.appendChild(settingsSidebar);
 
+  // 0. Nhóm: Xoay khuôn (0° - 360°)
+  const secRotate = el('div', {
+    style: 'display: flex; flex-direction: column; gap: 6px;',
+  });
+  const rotHead = el('div', {
+    style: 'display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary);',
+  });
+  rotHead.appendChild(el('span', { text: 'Xoay khuôn' }));
+  const rotValLabel = el('span', { text: `${sceneCtx.getRotationYDeg()}°` });
+  rotHead.appendChild(rotValLabel);
+  secRotate.appendChild(rotHead);
+
+  const sliderRotation = document.createElement('input');
+  sliderRotation.type = 'range';
+  sliderRotation.min = '0';
+  sliderRotation.max = '360';
+  sliderRotation.step = '1';
+  sliderRotation.value = String(sceneCtx.getRotationYDeg());
+  sliderRotation.style.cssText = 'accent-color: var(--color-primary); cursor: pointer;';
+  secRotate.appendChild(sliderRotation);
+
+  sliderRotation.addEventListener('input', () => {
+    const deg = Number(sliderRotation.value);
+    rotValLabel.textContent = `${deg}°`;
+    sceneCtx.setRotationYDeg(deg);
+  });
+
+  sceneCtx.onRotate((deg) => {
+    sliderRotation.value = String(deg);
+    rotValLabel.textContent = `${deg}°`;
+  });
+
+  settingsSidebar.appendChild(secRotate);
+
   // 1. Nhóm: Màu nền giấy
   const secColor = el('div', {
     style: 'display: flex; flex-direction: column; gap: 8px;',
@@ -297,7 +342,7 @@ export function initMockupCard(
   secColor.appendChild(chipsRow);
   settingsSidebar.appendChild(secColor);
 
-  // 2. Nhóm: Độ dày giấy, kết cấu (4 mẫu texture)
+  // 2. Nhóm: Độ dày giấy, kết cấu (4 mẫu sóng carton chuẩn có hình sóng)
   const secTexture = el('div', {
     style: 'display: flex; flex-direction: column; gap: 8px;',
   });
@@ -310,21 +355,16 @@ export function initMockupCard(
     style: 'display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;',
   });
 
-  const textureTypes: Array<{ id: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc'; label: string; desc: string }> = [
-    { id: 'ivory', label: 'Ivory', desc: 'Giấy phẳng láng' },
-    { id: 'flute_e', label: 'Sóng E', desc: 'Carton 3 lớp mỏng (~1.5mm)' },
-    { id: 'flute_b', label: 'Sóng B/C', desc: 'Carton 3 lớp chuẩn (~3mm)' },
-    { id: 'flute_bc', label: 'Sóng BC', desc: 'Carton 5 lớp dày (~6mm)' },
-  ];
-
-  let currentTexture = store.get().paperTexture || 'flute_b';
+  const fluteList: FluteType[] = ['flute_e', 'flute_b', 'flute_bc', 'flute_feng'];
+  let currentTexture: FluteType = (store.get().paperTexture as FluteType) || 'flute_b';
   const textureButtons = new Map<string, HTMLElement>();
 
-  for (const t of textureTypes) {
-    const isAct = t.id === currentTexture;
+  for (const fluteKey of fluteList) {
+    const spec = FLUTE_SPECS[fluteKey];
+    const isAct = fluteKey === currentTexture;
     const btnT = el('button', {
       type: 'button',
-      title: `${t.label}: ${t.desc}`,
+      title: `${spec.label}: ${spec.desc}`,
       style: `
         display: flex;
         flex-direction: column;
@@ -332,48 +372,42 @@ export function initMockupCard(
         justify-content: center;
         gap: 4px;
         padding: 6px 2px;
-        background: ${isAct ? 'rgba(0, 210, 135, 0.12)' : 'rgba(255, 255, 255, 0.04)'};
-        border: 1.5px solid ${isAct ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.08)'};
+        background: ${isAct ? 'rgba(0, 210, 135, 0.15)' : 'rgba(255, 255, 255, 0.04)'};
+        border: ${isAct ? '2px solid var(--color-primary)' : '1px solid rgba(255, 255, 255, 0.12)'};
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.15s ease;
       `,
     });
 
-    // Icon mô phỏng lát cắt sóng carton
-    const iconSpan = el('span', {
-      style: `
-        display: block;
-        width: 32px;
-        height: 16px;
-        border-radius: 2px;
-        background: #c8a882;
-        border-top: 2px solid #5a442e;
-        border-bottom: 2px solid #5a442e;
-        ${t.id === 'ivory' ? 'border-top: none; height: 10px;' : ''}
-        ${t.id === 'flute_bc' ? 'border-bottom: 4px double #5a442e; height: 18px;' : ''}
-      `,
-    });
+    const iconImg = document.createElement('img');
+    iconImg.src = spec.icon;
+    iconImg.alt = spec.label;
+    iconImg.width = 26;
+    iconImg.height = 26;
+    iconImg.style.cssText = 'display: block; image-rendering: pixelated; object-fit: contain; pointer-events: none;';
 
     const nameSpan = el('span', {
-      text: t.label,
-      style: 'font-size: 10px; font-weight: 600; color: var(--text-secondary);',
+      text: spec.label,
+      style: `font-size: 10px; font-weight: 600; color: ${isAct ? 'var(--color-primary)' : 'var(--text-secondary)'}; white-space: nowrap;`,
     });
 
-    btnT.appendChild(iconSpan);
+    btnT.appendChild(iconImg);
     btnT.appendChild(nameSpan);
-    textureButtons.set(t.id, btnT);
+    textureButtons.set(fluteKey, btnT);
 
     btnT.addEventListener('click', () => {
-      currentTexture = t.id;
-      store.set({ paperTexture: t.id });
+      currentTexture = fluteKey;
+      store.set({ paperTexture: fluteKey });
       textureButtons.forEach((b, k) => {
-        const act = k === t.id;
-        b.style.background = act ? 'rgba(0, 210, 135, 0.12)' : 'rgba(255, 255, 255, 0.04)';
-        b.style.borderColor = act ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.08)';
+        const act = k === fluteKey;
+        b.style.background = act ? 'rgba(0, 210, 135, 0.15)' : 'rgba(255, 255, 255, 0.04)';
+        b.style.border = act ? '2px solid var(--color-primary)' : '1px solid rgba(255, 255, 255, 0.12)';
+        const lbl = b.querySelector('span');
+        if (lbl) (lbl as HTMLElement).style.color = act ? 'var(--color-primary)' : 'var(--text-secondary)';
       });
       if (currentModel) {
-        currentModel.setPaperTexture(t.id);
+        currentModel.setPaperTexture(fluteKey);
         sceneCtx.render();
       }
     });
@@ -471,18 +505,6 @@ export function initMockupCard(
 
   container.appendChild(card);
 
-  // ==========================================
-  // KHỞI TẠO SCENE 3D THREE.JS
-  // ==========================================
-  const sceneCtx: Scene3DContext = create3DScene(canvasWrap);
-  let currentModel: FoldModelResult | null = null;
-  let animator: FoldAnimator | null = null;
-  let currentBoxDef = initialBox;
-
-  // Áp dụng độ sáng ban đầu
-  if (store.get().ambientLight) sceneCtx.setAmbientIntensity(store.get().ambientLight!);
-  if (store.get().dirLight) sceneCtx.setDirectionalIntensity(store.get().dirLight!);
-
   const updateModel = (s: AppDocState, boxDef: BoxDef) => {
     currentBoxDef = boxDef;
 
@@ -500,7 +522,8 @@ export function initMockupCard(
 
       currentModel = buildFoldModel(positioned, {
         paperColor: s.paperColor || '#c8a882',
-        paperTexture: s.paperTexture || 'flute_b',
+        paperTexture: (s.paperTexture as FluteType) || 'flute_b',
+        thickness: s.t,
       });
       sceneCtx.rootGroup.add(currentModel.rootGroup);
 

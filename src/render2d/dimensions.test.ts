@@ -38,3 +38,4 @@ describe('buildDimensionLines CAD Packaging', () => {
     expect(labels).toContain('6');
   });
 });
+

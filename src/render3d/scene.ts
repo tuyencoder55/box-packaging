@@ -17,6 +17,9 @@ export interface Scene3DContext {
   setDirectionalIntensity: (val: number) => void;
   getAmbientIntensity: () => number;
   getDirectionalIntensity: () => number;
+  setRotationYDeg: (deg: number) => void;
+  getRotationYDeg: () => number;
+  onRotate: (cb: (deg: number) => void) => void;
 }
 
 /**
@@ -90,6 +93,32 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
   const getDirectionalIntensity = () => lights.dir1.intensity;
 
   // Điều khiển chuột & cảm ứng: Xoay tự do (Orbit), Cầm nắm di chuyển (Pan), Phóng to/thu nhỏ (Zoom)
+  const ROTATE_SPEED = 0.0035; // Giảm tốc độ xoay ~3 lần giúp thao tác êm ái, mượt mà và kiểm soát góc nhìn chuẩn xác
+  const rotateCallbacks: Array<(deg: number) => void> = [];
+
+  const notifyRotate = () => {
+    if (rotateCallbacks.length === 0) return;
+    const deg = getRotationYDeg();
+    rotateCallbacks.forEach((cb) => cb(deg));
+  };
+
+  const onRotate = (cb: (deg: number) => void) => {
+    rotateCallbacks.push(cb);
+  };
+
+  const getRotationYDeg = (): number => {
+    let deg = Math.round((rootGroup.rotation.y * 180) / Math.PI) % 360;
+    if (deg < 0) deg += 360;
+    return deg;
+  };
+
+  const setRotationYDeg = (deg: number) => {
+    rootGroup.rotation.y = (deg * Math.PI) / 180;
+    render();
+    notifyRotate();
+  };
+
+  // Điều khiển chuột & cảm ứng: Xoay tự do (Orbit), Cầm nắm di chuyển (Pan), Phóng to/thu nhỏ (Zoom)
   let isDragging = false;
   let activeMouseButton = 0; // 0: trái, 1: giữa, 2: phải
   let isShiftOrSpace = false;
@@ -133,9 +162,10 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
       rootGroup.position.x += deltaX * panFactor;
       rootGroup.position.y -= deltaY * panFactor; // Trục Y trong Three.js hướng lên trên
     } else {
-      // Xoay (Orbit) quanh tâm
-      rootGroup.rotation.y += deltaX * 0.01;
-      rootGroup.rotation.x += deltaY * 0.01;
+      // Xoay (Orbit) quanh tâm với tốc độ êm ái
+      rootGroup.rotation.y += deltaX * ROTATE_SPEED;
+      rootGroup.rotation.x += deltaY * ROTATE_SPEED;
+      notifyRotate();
     }
 
     render();
@@ -183,8 +213,9 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
         rootGroup.position.x += deltaX * panFactor;
         rootGroup.position.y -= deltaY * panFactor;
       } else {
-        rootGroup.rotation.y += deltaX * 0.01;
-        rootGroup.rotation.x += deltaY * 0.01;
+        rootGroup.rotation.y += deltaX * ROTATE_SPEED;
+        rootGroup.rotation.x += deltaY * ROTATE_SPEED;
+        notifyRotate();
       }
       render();
     } else if (e.touches.length === 2) {
@@ -239,6 +270,7 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
   const resetView = () => {
     rootGroup.position.set(0, 0, 0);
     rootGroup.rotation.set(0.35, -0.55, 0);
+    notifyRotate();
     render();
   };
 
@@ -312,5 +344,8 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
     setDirectionalIntensity,
     getAmbientIntensity,
     getDirectionalIntensity,
+    setRotationYDeg,
+    getRotationYDeg,
+    onRotate,
   };
 }

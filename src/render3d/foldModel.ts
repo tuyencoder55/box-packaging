@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import type { LayoutPanel } from '../core/layout';
 import type { PanelNode, Pt } from '../core/types';
+import { FLUTE_ATLAS_PNG, FLUTE_SPECS, type FluteType } from './fluteAssets';
 
 export interface PanelHingeInfo {
   id: string;
@@ -16,16 +17,82 @@ export interface PanelHingeInfo {
 
 export interface FoldModelOptions {
   paperColor?: string | number;
-  paperTexture?: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc';
+  paperTexture?: FluteType | 'ivory';
+  thickness?: number;
 }
 
 export interface FoldModelResult {
   rootGroup: THREE.Group;
   hinges: Map<string, PanelHingeInfo>;
   outerMaterial: THREE.MeshStandardMaterial;
+  edgeMaterial: THREE.MeshStandardMaterial;
   setPaperColor: (color: string | number) => void;
-  setPaperTexture: (type: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc') => void;
+  setPaperTexture: (type: FluteType | 'ivory') => void;
   dispose: () => void;
+}
+
+/**
+ * Trình quản lý họa tiết lát cắt sóng carton (Corrugated Flute Edge Texture)
+ */
+function createEdgeTextureManager() {
+  const canvas = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+  const ctx = canvas?.getContext('2d');
+  if (canvas) {
+    canvas.width = 256;
+    canvas.height = 128;
+  }
+  let atlasImg: HTMLImageElement | null = null;
+  if (typeof Image !== 'undefined') {
+    atlasImg = new Image();
+    atlasImg.src = FLUTE_ATLAS_PNG;
+  }
+
+  const texture = canvas ? new THREE.CanvasTexture(canvas) : new THREE.Texture();
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+
+  const update = (flute: FluteType | 'ivory') => {
+    if (!ctx || !canvas) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (flute === 'ivory') {
+      ctx.fillStyle = '#f4f0ea';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      texture.needsUpdate = true;
+      return;
+    }
+    const spec = FLUTE_SPECS[flute] || FLUTE_SPECS.flute_b;
+    const draw = () => {
+      if (atlasImg && atlasImg.naturalWidth > 0) {
+        ctx.drawImage(
+          atlasImg,
+          0,
+          spec.start,
+          atlasImg.naturalWidth,
+          spec.end - spec.start,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+      } else {
+        ctx.fillStyle = '#c29b6f';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      texture.needsUpdate = true;
+    };
+
+    if (atlasImg?.complete && atlasImg.naturalWidth > 0) {
+      draw();
+    } else if (atlasImg) {
+      atlasImg.onload = draw;
+    }
+  };
+
+  return { texture, update };
 }
 
 /**
@@ -67,12 +134,26 @@ export function buildFoldModel(panels: LayoutPanel[], options?: FoldModelOptions
   });
   materials.push(outerMat);
 
+  // Tạo vật liệu lát cắt sóng carton cho các cạnh viền cắt
+  const edgeManager = createEdgeTextureManager();
+  const edgeMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    map: edgeManager.texture,
+    roughness: 0.9,
+    metalness: 0.15,
+    side: THREE.DoubleSide,
+  });
+  materials.push(edgeMat);
+
   const setPaperColor = (color: string | number) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     outerMat.color.set(color as any);
   };
 
-  const setPaperTexture = (type: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc') => {
+  const setPaperTexture = (type: FluteType | 'ivory') => {
+    edgeManager.update(type);
+    edgeMat.needsUpdate = true;
+
     switch (type) {
       case 'ivory':
         outerMat.roughness = 0.35;
@@ -90,12 +171,19 @@ export function buildFoldModel(panels: LayoutPanel[], options?: FoldModelOptions
         outerMat.roughness = 0.96;
         outerMat.metalness = 0.08;
         break;
+      case 'flute_feng':
+        outerMat.roughness = 0.98;
+        outerMat.metalness = 0.1;
+        break;
     }
   };
 
-  if (options?.paperTexture) {
-    setPaperTexture(options.paperTexture);
-  }
+  const currentFlute = options?.paperTexture ?? 'flute_b';
+  setPaperTexture(currentFlute);
+
+  const spec = FLUTE_SPECS[currentFlute === 'ivory' ? 'flute_e' : currentFlute] || FLUTE_SPECS.flute_b;
+  const panelThickness = options?.thickness ?? spec.thickness;
+  const flutePitch = spec.pitch;
 
   // 1. Tính toán điểm gốc bản lề (hinge position) trong tọa độ phẳng cho từng panel
   const hingeOrigins = new Map<string, [number, number]>();
@@ -120,14 +208,32 @@ export function buildFoldModel(panels: LayoutPanel[], options?: FoldModelOptions
     groupMap.set(p.node.id, g);
   });
 
-  // 3. Dựng hình học và gắn cây phân cấp
+  // 3. Dựng hình học 3D có độ dày & vân sóng carton trên các cạnh
   panels.forEach((p) => {
     const origin = hingeOrigins.get(p.node.id) ?? [0, 0];
     const shape = createPanelShape(p.poly, origin[0], origin[1]);
-    const geo = new THREE.ShapeGeometry(shape);
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: panelThickness,
+      bevelEnabled: false,
+    });
+    geo.translate(0, 0, -panelThickness / 2);
+
+    // Chuẩn hoá tọa độ UV các mặt bên (Extrude side faces) để hiển thị lượn sóng sin liên tục theo chu vi
+    const uv = geo.attributes.uv;
+    const sideGroup = geo.groups[1];
+    if (sideGroup && uv) {
+      for (let i = sideGroup.start; i < sideGroup.start + sideGroup.count; i++) {
+        const u = uv.getX(i) / flutePitch;
+        const rawV = uv.getY(i);
+        const v = (1 - rawV) / panelThickness;
+        uv.setXY(i, u, v);
+      }
+      uv.needsUpdate = true;
+    }
     geometries.push(geo);
 
-    const mesh = new THREE.Mesh(geo, outerMat);
+    // Mặt trước/sau dùng outerMat (mặt giấy), mặt cạnh cắt dùng edgeMat (sóng carton)
+    const mesh = new THREE.Mesh(geo, [outerMat, edgeMat]);
     mesh.name = `mesh-${p.node.id}`;
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -135,25 +241,26 @@ export function buildFoldModel(panels: LayoutPanel[], options?: FoldModelOptions
     const group = groupMap.get(p.node.id)!;
     group.add(mesh);
 
-    // 1. Đường viền dao cắt bao quanh panel (cạnh giấy carton đậm rõ nét)
-    const edgeGeo = new THREE.EdgesGeometry(geo);
+    // 1. Đường viền dao cắt mờ sắc nét định hình mép phôi
+    const edgeGeo = new THREE.EdgesGeometry(geo, 35);
     geometries.push(edgeGeo);
-    const edgeMat = new THREE.LineBasicMaterial({
-      color: 0x3d352b, // Viền cạnh cắt sắc nét
-      linewidth: 1.5,
+    const edgeLineMat = new THREE.LineBasicMaterial({
+      color: 0x3d352b,
+      transparent: true,
+      opacity: 0.35,
     });
-    materials.push(edgeMat);
-    const edgeLine = new THREE.LineSegments(edgeGeo, edgeMat);
-    edgeLine.position.z = 0.15; // Nổi nhẹ trên bề mặt để tránh z-fighting
+    materials.push(edgeLineMat);
+    const edgeLine = new THREE.LineSegments(edgeGeo, edgeLineMat);
     group.add(edgeLine);
 
     // 2. Đường nếp cấn (đường gấp bản lề) nét đứt màu đỏ nổi bật
     if (p.baseSeg) {
       const dx = p.baseSeg.b[0] - p.baseSeg.a[0];
       const dy = -(p.baseSeg.b[1] - p.baseSeg.a[1]);
+      const zOffset = panelThickness / 2 + 0.15;
       const creaseGeo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(0, 0, 0.3),
-        new THREE.Vector3(dx, dy, 0.3),
+        new THREE.Vector3(0, 0, zOffset),
+        new THREE.Vector3(dx, dy, zOffset),
       ]);
       geometries.push(creaseGeo);
       const creaseMat = new THREE.LineDashedMaterial({
@@ -238,6 +345,7 @@ export function buildFoldModel(panels: LayoutPanel[], options?: FoldModelOptions
     rootGroup,
     hinges,
     outerMaterial: outerMat,
+    edgeMaterial: edgeMat,
     setPaperColor,
     setPaperTexture,
     dispose,

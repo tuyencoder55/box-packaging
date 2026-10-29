@@ -22,7 +22,7 @@ export interface AppDocState {
   cutColor?: string;
   creaseColor?: string;
   paperColor?: string;
-  paperTexture?: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc';
+  paperTexture?: 'ivory' | 'flute_e' | 'flute_b' | 'flute_bc' | 'flute_feng';
   ambientLight?: number;
   dirLight?: number;
 }
