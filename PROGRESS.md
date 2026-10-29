@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P1 (xong P1.2, chuẩn bị P1.3)
+Đang ở: P1 (xong P1.3, chuẩn bị P1.4)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -12,7 +12,7 @@
 - [ ] P1 Lõi khuôn (fefco-0201)
   - [x] P1.1 core/shapes.ts (rect, chamfer, rounded) + test
   - [x] P1.2 core/layout.ts (cây panel → toạ độ phẳng) + test
-  - [ ] P1.3 core/dieline.ts (phân loại đường cắt/cấn) + test
+  - [x] P1.3 core/dieline.ts (phân loại đường cắt/cấn) + test
   - [ ] P1.4 boxes/fefco-0201.ts + boxes/index.ts + test
   - [ ] P1.5 render2d/svgView.ts vẽ khuôn vào app.html + fit khung
 - [ ] P2 Studio 2D
@@ -40,3 +40,4 @@
 - 2026-10-29 P0.5: kiểm tra docs/MAP.md và hoàn thành toàn bộ Phase P0
 - 2026-10-29 P1.1: core/shapes.ts (rect, chamfer, trapezoid, rounded) và unit tests (16 tests xanh)
 - 2026-10-29 P1.2: core/layout.ts (bố cục cây panel phẳng 2D) và unit tests (19 tests xanh)
+- 2026-10-29 P1.3: core/dieline.ts (phân loại đường cắt/cấn, khử trùng lặp, tính bbox) và unit tests (22 tests xanh)
