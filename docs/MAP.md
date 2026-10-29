@@ -54,5 +54,6 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ home.ts · templates.ts · app.ts — chỉ ghép module, không chứa logic
 
 ## src/styles
-- ⬜ 🧊 tokens.css — màu, cỡ chữ, bo góc
-- ⬜ base.css · app.css · templates.css
+- ✅ 🧊 tokens.css — màu, cỡ chữ, bo góc
+- ✅ base.css — kiểu nền và font dùng chung
+- ⬜ app.css · templates.css

@@ -1,0 +1,41 @@
+/* Design Tokens — Màu sắc, kiểu chữ và thông số giao diện chuẩn BoxMaker */
+:root {
+  /* Màu nền */
+  --bg-app: #1d2027;
+  --bg-surface: #262a34;
+  --bg-surface-hover: #2f3441;
+  --bg-input: #15171c;
+
+  /* Màu viền */
+  --border-subtle: #2d323e;
+  --border-strong: #3d4353;
+
+  /* Màu chữ */
+  --text-main: #f0f2f5;
+  --text-muted: #9da5b4;
+  --text-dim: #636b7b;
+
+  /* Màu nhấn: Xanh bạc hà kiểu Pacvina */
+  --accent: #00d287;
+  --accent-hover: #00b975;
+  --accent-text: #0d1117;
+
+  /* Màu chỉ dẫn khuôn dieline */
+  --color-cut: #3b82f6;        /* Dao dứt: xanh dương */
+  --color-crease: #ef4444;     /* Dao cấn: đỏ đứt nét */
+  --color-bleed: #10b981;      /* Bleed: xanh lá */
+
+  /* Kiểu chữ & Font */
+  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+
+  /* Bo góc */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+}

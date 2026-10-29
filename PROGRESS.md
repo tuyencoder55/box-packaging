@@ -1,12 +1,12 @@
 # PROGRESS
 
-Đang ở: P0 (xong P0.2, chuẩn bị P0.3)
+Đang ở: P0 (xong P0.3, chuẩn bị P0.4)
 
 ## Phase
 - [ ] P0 Khung dự án
   - [x] P0.1 Khởi tạo dự án, cài three, vitest, @types/three, script check
   - [x] P0.2 Tạo 3 file HTML (index/templates/app), cấu hình multi-page trong vite.config.ts
-  - [ ] P0.3 styles/tokens.css + base.css (nền #1d2027, xanh bạc hà, font Inter)
+  - [x] P0.3 styles/tokens.css + base.css (nền #1d2027, xanh bạc hà, font Inter)
   - [ ] P0.4 core/types.ts, core/units.ts, core/store.ts + test
   - [ ] P0.5 Đồng bộ docs/MAP.md
 - [ ] P1 Lõi khuôn (fefco-0201)
@@ -30,3 +30,4 @@
 ## Nhật ký checkpoint
 - 2026-10-29 P0.1: khởi tạo dự án, cài three, vitest, script check
 - 2026-10-29 P0.2: 3 trang HTML index/templates/app và cấu hình multi-page vite.config.ts
+- 2026-10-29 P0.3: styles/tokens.css và base.css (nền tối, xanh bạc hà, font Inter)
