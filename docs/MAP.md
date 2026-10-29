@@ -4,11 +4,11 @@ Quy ước: mỗi file một dòng. Cập nhật bằng `/checkpoint` mỗi khi 
 Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sửa nếu không được yêu cầu rõ)
 
 ## Gốc
-- ⬜ index.html — trang chủ (khung mỏng)
-- ⬜ templates.html — trang thư viện mẫu (khung mỏng)
-- ⬜ app.html — Studio (khung mỏng)
+- ✅ index.html — trang chủ (khung mỏng)
+- ✅ templates.html — trang thư viện mẫu (khung mỏng)
+- ✅ app.html — Studio (khung mỏng)
 - ✅ 🧊 package.json / tsconfig.json — cấu hình
-- ⬜ 🧊 vite.config.ts — cấu hình multi-page
+- ✅ 🧊 vite.config.ts — cấu hình multi-page
 
 ## src/core (logic thuần, có test)
 - ⬜ 🧊 types.ts — kiểu dữ liệu dùng chung
@@ -51,7 +51,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ⬜ templates/cardGrid.ts · filterBar.ts · detailModal.ts
 
 ## src/pages
-- ⬜ home.ts · templates.ts · app.ts — chỉ ghép module, không chứa logic
+- ✅ home.ts · templates.ts · app.ts — chỉ ghép module, không chứa logic
 
 ## src/styles
 - ⬜ 🧊 tokens.css — màu, cỡ chữ, bo góc
