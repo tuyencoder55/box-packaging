@@ -39,7 +39,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 ## src/render3d
 - ✅ scene.ts — scene/camera/đèn
 - ✅ foldModel.ts — cây panel → hộp 3D
-- ⬜ foldAnim.ts — gấp/mở theo bước
+- ✅ foldAnim.ts — gấp/mở theo bước
 
 ## src/export
 - ⬜ pdfWriter.ts — bộ ghi PDF tối thiểu tự viết (layer, màu pha, nét đứt)

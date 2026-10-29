@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P4 (xong P4.2, chuẩn bị P4.3)
+Đang ở: P4 (xong P4.3, chuẩn bị P4.4)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -32,7 +32,7 @@
 - [ ] P4 Mockup 3D
   - [x] P4.1 render3d/scene.ts (khung 3D, camera, đèn, điều khiển chuột) + test
   - [x] P4.2 render3d/foldModel.ts (cây panel → hộp 3D lồng nhau)
-  - [ ] P4.3 render3d/foldAnim.ts (thanh trượt gấp/mở theo step)
+  - [x] P4.3 render3d/foldAnim.ts (thanh trượt gấp/mở theo step)
   - [ ] P4.4 ui/app/mockupCard.ts (thẻ nổi góc phải + phóng to xem 3D)
   - [ ] P4.5 Kết nối vào trang app.html và templates.html
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
@@ -75,3 +75,4 @@
 - 2026-10-29 P3.6: dropdown bộ chọn loại hộp trên topBar Studio app.html, hoàn thành toàn bộ Phase P3
 - 2026-10-29 P4.1: render3d/scene.ts thiết lập khung cảnh 3D, camera, đèn và điều khiển chuột (48 tests xanh)
 - 2026-10-29 P4.2: render3d/foldModel.ts dựng cây bản lề THREE.Group lồng nhau cho hộp 3D (49 tests xanh)
+- 2026-10-29 P4.3: render3d/foldAnim.ts hoạt hoạ gấp/mở theo step và thanh trượt tiến độ (52 tests xanh)
