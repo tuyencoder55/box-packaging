@@ -60,3 +60,4 @@ describe('core/chain', () => {
     expect(chainedLength).toBeCloseTo(originalLength, 3);
   });
 });
+

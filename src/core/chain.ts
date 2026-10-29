@@ -155,3 +155,4 @@ export function calcPolylineLength(lines: Polyline[]): number {
   }
   return total;
 }
+

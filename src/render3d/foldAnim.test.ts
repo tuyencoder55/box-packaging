@@ -56,3 +56,4 @@ describe('render3d/foldAnim', () => {
     expect(hinges.get('p3')!.group.rotation.x).toBe(0);
   });
 });
+

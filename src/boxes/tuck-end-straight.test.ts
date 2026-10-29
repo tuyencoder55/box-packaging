@@ -47,3 +47,4 @@ describe('tuck-end-straight', () => {
     expect(dieline.bbox[3]).toBe(272);
   });
 });
+

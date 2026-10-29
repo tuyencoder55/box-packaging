@@ -13,3 +13,4 @@ export function captureCanvasToPng(canvas: HTMLCanvasElement, filename: string) 
     }
   }, 'image/png');
 }
+

@@ -14,3 +14,4 @@ export function downloadText(content: string, filename: string, mimeType: string
   const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
   downloadBlob(blob, filename);
 }
+
