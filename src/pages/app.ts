@@ -5,10 +5,12 @@ import { layoutPanels } from '../core/layout';
 import { transformDieline } from '../core/orient';
 import { createStore } from '../core/store';
 import { calcEffectiveParams } from '../core/thickness';
+import type { Dieline } from '../core/types';
 import { buildDimensionLines } from '../render2d/dimensions';
 import { renderSvgView } from '../render2d/svgView';
 import { setupZoomPan, type ZoomPanController } from '../render2d/zoomPan';
 import { initMockupCard, type MockupCardController } from '../ui/app/mockupCard';
+import { openExportModal } from '../ui/app/exportModal';
 import { initParamPanel, type AppDocState } from '../ui/app/paramPanel';
 import { createStepBar, type StepId } from '../ui/app/stepBar';
 
@@ -133,6 +135,7 @@ function initStudio() {
   // Khởi tạo thẻ nổi Mockup 3D
   const mockupContainer = document.getElementById('mockup-card');
   let mockupController: MockupCardController | null = null;
+  let currentDieline: Dieline | null = null;
 
   function switchStep(newStep: StepId) {
     if (newStep === 'mockup') {
@@ -151,6 +154,10 @@ function initStudio() {
         mockupContainer.style.height = 'auto';
       }
       mockupController?.setMode('pip');
+    } else if (newStep === 'export') {
+      if (currentDieline) {
+        openExportModal(store.get(), currentDieline, () => mockupContainer?.querySelector('canvas') ?? null);
+      }
     }
   }
 
@@ -180,8 +187,9 @@ function initStudio() {
     btnExport.style.cssText =
       'background: var(--accent); color: var(--accent-text); border: none; padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer;';
     btnExport.addEventListener('click', () => {
-      const exportBtn = stepBarContainer?.querySelector('[data-step="export"]') as HTMLButtonElement | null;
-      exportBtn?.click();
+      if (currentDieline) {
+        openExportModal(store.get(), currentDieline, () => mockupContainer?.querySelector('canvas') ?? null);
+      }
     });
   }
 
@@ -198,6 +206,7 @@ function initStudio() {
     const layouts = layoutPanels(nodes);
     const dieline = buildDieline(layouts);
     const orientedDieline = transformDieline(dieline, s.orient);
+    currentDieline = orientedDieline;
     const dimLines = buildDimensionLines(boxDef.dims, layouts, { l: s.l, w: s.w, h: s.h }, s.unit);
 
     if (viewport) {

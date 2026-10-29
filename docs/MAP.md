@@ -43,11 +43,8 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 
 ## src/export
 - ✅ pdfWriter.ts — bộ ghi PDF tối thiểu tự viết (layer, màu pha, nét đứt)
-- ✅ pdf.ts
-- ⬜ ai.ts — AI (cùng pdfWriter)
-- ✅ dxf.ts
-- ⬜ png.ts
-- ✅ svg.ts · download.ts
+- ✅ pdf.ts · ai.ts — PDF và AI (cùng pdfWriter)
+- ✅ dxf.ts · svg.ts · png.ts · download.ts
 
 ## src/ui
 - ✅ dom.ts — helper tạo DOM el()
@@ -55,7 +52,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ app/legend.ts — bảng chú giải dao cắt/cấn
 - ✅ app/stepBar.ts — thanh chuyển 3 bước Dieline/3D/Xuất
 - ✅ app/mockupCard.ts — thẻ nổi và chế độ xem 3D toàn màn hình
-- ⬜ app/exportModal.ts — modal xuất file
+- ✅ app/exportModal.ts — modal xuất file
 - ✅ templates/cardGrid.ts · filterBar.ts
 - ⬜ templates/detailModal.ts
 
