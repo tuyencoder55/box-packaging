@@ -38,7 +38,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 
 ## src/render3d
 - ✅ scene.ts — scene/camera/đèn
-- ⬜ foldModel.ts — cây panel → hộp 3D
+- ✅ foldModel.ts — cây panel → hộp 3D
 - ⬜ foldAnim.ts — gấp/mở theo bước
 
 ## src/export
