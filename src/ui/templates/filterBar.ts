@@ -12,6 +12,7 @@ export const CATEGORIES: CategoryOption[] = [
   { id: 'tuck', label: 'Hộp nắp gài' },
   { id: 'auto-lock', label: 'Đáy khoá' },
   { id: 'mailer', label: 'Hộp Mailer' },
+  { id: 'other', label: 'Hộp âm dương' },
 ];
 
 export function createFilterBar(
@@ -47,3 +48,4 @@ export function createFilterBar(
     container.appendChild(btn);
   });
 }
+

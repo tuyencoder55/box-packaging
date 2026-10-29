@@ -351,7 +351,29 @@ export function initParamPanel(
   if (boxDef.options && boxDef.options.length > 0) {
     const cardOpts = createCard('Tùy chọn cấu trúc');
     for (const opt of boxDef.options) {
-      if (opt.type === 'number') {
+      if (opt.type === 'select' && opt.choices) {
+        const optWrap = el('div', { style: 'display: flex; flex-direction: column; gap: 5px;' });
+        const optLbl = el('span', { text: opt.label, style: 'font-size: 12px; color: var(--text-muted);' });
+        const curVal = String(state.opts[opt.key] ?? opt.default);
+        const optSelect = el(
+          'select',
+          {
+            style: inputStyle,
+            onChange: (e: Event) => {
+              const val = (e.target as HTMLSelectElement).value;
+              store.set((prev) => ({
+                opts: { ...prev.opts, [opt.key]: val },
+              }));
+            },
+          },
+          ...opt.choices.map((c) =>
+            el('option', { value: c.value, selected: c.value === curVal }, c.label)
+          )
+        );
+        optWrap.appendChild(optLbl);
+        optWrap.appendChild(optSelect);
+        cardOpts.appendChild(optWrap);
+      } else if (opt.type === 'number') {
         const optWrap = el('div', { style: 'display: flex; flex-direction: column; gap: 5px;' });
         const optLbl = el('span', { text: opt.label, style: 'font-size: 12px; color: var(--text-muted);' });
         const optInp = el('input', {
