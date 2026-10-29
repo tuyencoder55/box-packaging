@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P5 (xong P5.1, chuẩn bị P5.2)
+Đang ở: P5 (xong P5.2, chuẩn bị P5.3)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -37,7 +37,7 @@
   - [x] P4.5 Kết nối vào trang app.html qua stepBar và đồng bộ thời gian thực
 - [ ] P5 Xuất file (PDF, AI, DXF bắt buộc; SVG, PNG)
   - [x] P5.1 core/chain.ts (nối đoạn rời thành polyline liền) + test
-  - [ ] P5.2 export/download.ts + export/svg.ts
+  - [x] P5.2 export/download.ts + export/svg.ts + test
   - [ ] P5.3 export/dxf.ts (CAD / cắt bế CNC) + test
   - [ ] P5.4 export/pdfWriter.ts + export/pdf.ts (layer, màu pha CUT/CREASE) + test
   - [ ] P5.5 export/ai.ts (Adobe Illustrator)
@@ -86,3 +86,4 @@
 - 2026-10-29 P4.3: render3d/foldAnim.ts hoạt hoạ gấp/mở theo step và thanh trượt tiến độ (52 tests xanh)
 - 2026-10-29 P4.4 & P4.5: ui/app/mockupCard.ts thẻ nổi 3D, tích hợp stepBar chuyển đổi dieline 2D/3D toàn màn hình, hoàn thành Phase P4 (52 tests xanh)
 - 2026-10-29 P5.1: core/chain.ts nối các đoạn rời thành polyline liền mạch và bảo toàn chiều dài (55 tests xanh)
+- 2026-10-29 P5.2: export/download.ts + export/svg.ts xuất file SVG kỹ thuật 2 layer CUT/CREASE (56 tests xanh)
