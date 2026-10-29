@@ -1,5 +1,5 @@
 // Xuất file PDF chuẩn in ấn: 3 Layer OCG (CUT, CREASE, DIMENSION), màu pha Separation CMYK, Overprint
-import { chainSegments, type Polyline } from '../core/chain';
+// Từng đoạn line được vẽ riêng biệt, độc lập giúp dễ dàng chọn và chỉnh sửa trong Illustrator
 import type { Dieline } from '../core/types';
 import type { DimensionLine } from '../render2d/dimensions';
 import { PdfWriter } from './pdfWriter';
@@ -8,30 +8,6 @@ const MM_TO_PT = 72 / 25.4;
 
 function round3(n: number): number {
   return Math.round(n * 1000) / 1000;
-}
-
-function polylineToPdfOps(line: Polyline, originX: number, originY: number, totalH_mm: number): string {
-  if (line.pts.length === 0) return '';
-  const ops: string[] = [];
-
-  const toPtX = (x: number) => round3((x - originX) * MM_TO_PT);
-  // Trục Y của PDF hướng lên trên: y' = totalH - (y - originY)
-  const toPtY = (y: number) => round3((totalH_mm - (y - originY)) * MM_TO_PT);
-
-  const p0 = line.pts[0];
-  ops.push(`${toPtX(p0[0])} ${toPtY(p0[1])} m`);
-
-  for (let i = 1; i < line.pts.length; i++) {
-    const pt = line.pts[i];
-    ops.push(`${toPtX(pt[0])} ${toPtY(pt[1])} l`);
-  }
-
-  if (line.closed) {
-    ops.push('h'); // Đóng đường
-  }
-
-  ops.push('S'); // Stroke
-  return ops.join(' ');
 }
 
 /**
@@ -48,15 +24,10 @@ export function generatePdfContent(
   let bMaxY = dieline.bbox[1] + dieline.bbox[3];
 
   for (const d of dimLines) {
-    if (d.start[0] < bMinX) bMinX = d.start[0];
-    if (d.start[1] < bMinY) bMinY = d.start[1];
-    if (d.start[0] > bMaxX) bMaxX = d.start[0];
-    if (d.start[1] > bMaxY) bMaxY = d.start[1];
-
-    if (d.end[0] < bMinX) bMinX = d.end[0];
-    if (d.end[1] < bMinY) bMinY = d.end[1];
-    if (d.end[0] > bMaxX) bMaxX = d.end[0];
-    if (d.end[1] > bMaxY) bMaxY = d.end[1];
+    bMinX = Math.min(bMinX, d.start[0], d.end[0], d.mid[0] - 10);
+    bMinY = Math.min(bMinY, d.start[1], d.end[1], d.mid[1] - 8);
+    bMaxX = Math.max(bMaxX, d.start[0], d.end[0], d.mid[0] + 10);
+    bMaxY = Math.max(bMaxY, d.start[1], d.end[1], d.mid[1] + 8);
   }
 
   const originX = bMinX - margin;
@@ -72,33 +43,38 @@ export function generatePdfContent(
   const trimMaxX_pt = round3((margin + dieline.bbox[2]) * MM_TO_PT);
   const trimMaxY_pt = round3((margin + dieline.bbox[3]) * MM_TO_PT);
 
-  // Nối các đoạn rời thành polyline
-  const cutLines = chainSegments(dieline.cut);
-  const creaseLines = chainSegments(dieline.crease);
+  const toPtX = (x: number) => round3((x - originX) * MM_TO_PT);
+  const toPtY = (y: number) => round3((totalH_mm - (y - originY)) * MM_TO_PT);
 
   // Xây dựng Content Stream
   let streamBody = '/GS_OP gs\n'; // Kích hoạt Overprint
   streamBody += '0.709 w\n'; // Nét dày 0.25 mm (0.709 pt)
 
-  // 1. Layer CREASE (Đường nếp cấn)
+  // 1. Layer CREASE (Đường nếp cấn từng đoạn riêng biệt)
   streamBody += '/OC /OC_CREASE BDC\n';
   streamBody += '/CS_CREASE CS 1 SCN\n';
   streamBody += '[8.504 5.669] 0 d\n'; // Nét đứt: 3 mm nét (8.504 pt), 2 mm hở (5.669 pt)
 
-  for (const line of creaseLines) {
-    const ops = polylineToPdfOps(line, originX, originY, totalH_mm);
-    if (ops) streamBody += `${ops}\n`;
+  for (const seg of dieline.crease) {
+    const x1 = toPtX(seg.a[0]);
+    const y1 = toPtY(seg.a[1]);
+    const x2 = toPtX(seg.b[0]);
+    const y2 = toPtY(seg.b[1]);
+    streamBody += `${x1} ${y1} m ${x2} ${y2} l S\n`;
   }
   streamBody += 'EMC\n';
 
-  // 2. Layer CUT (Đường dao cắt ngoài)
+  // 2. Layer CUT (Đường dao cắt ngoài từng đoạn riêng biệt)
   streamBody += '/OC /OC_CUT BDC\n';
   streamBody += '/CS_CUT CS 1 SCN\n';
   streamBody += '[] 0 d\n'; // Nét liền
 
-  for (const line of cutLines) {
-    const ops = polylineToPdfOps(line, originX, originY, totalH_mm);
-    if (ops) streamBody += `${ops}\n`;
+  for (const seg of dieline.cut) {
+    const x1 = toPtX(seg.a[0]);
+    const y1 = toPtY(seg.a[1]);
+    const x2 = toPtX(seg.b[0]);
+    const y2 = toPtY(seg.b[1]);
+    streamBody += `${x1} ${y1} m ${x2} ${y2} l S\n`;
   }
   streamBody += 'EMC\n';
 

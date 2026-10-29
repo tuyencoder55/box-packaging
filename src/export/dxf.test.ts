@@ -32,13 +32,10 @@ describe('export/dxf', () => {
     expect(dxf).toContain('CREASE');
     expect(dxf).toContain('DIMENSION');
 
-    // Có các lệnh thực thể POLYLINE, VERTEX, SEQEND
-    expect(dxf).toContain('POLYLINE');
-    expect(dxf).toContain('VERTEX');
-    expect(dxf).toContain('SEQEND');
-
-    // Hình vuông cắt có flag 70 = 1 (khép kín)
-    expect(dxf).toContain('70\n1');
+    // Chứa các thực thể LINE riêng biệt (dễ dàng chọn và chỉnh sửa từng đoạn trong CAD)
+    expect(dxf).toContain('0\nLINE');
+    expect(dxf).toContain('8\nCUT');
+    expect(dxf).toContain('8\nCREASE');
   });
 
   it('sinh layer DIMENSION và text kích thước khi truyền dimLines', () => {

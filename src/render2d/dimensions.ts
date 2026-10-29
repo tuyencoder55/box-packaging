@@ -128,10 +128,10 @@ export function buildDimensionLines(
     const flapTop = isFOL ? w : w / 2;
     const flapBot = isFOL ? w : w / 2;
 
-    const yDimChain = -flapTop - 12; // Hàng 1: Chuỗi kích thước chi tiết
-    const yDimTotal = yDimChain - 18; // Hàng 2: Kích thước phủ bì tổng thể
-    const xDimChain = maxX + 14; // Cột 1: Chuỗi kích thước dọc chi tiết
-    const xDimTotal = xDimChain + 20; // Cột 2: Kích thước phủ bì chiều cao
+    const yDimChain = -flapTop - 16; // Hàng 1: Chuỗi kích thước chi tiết
+    const yDimTotal = yDimChain - 25; // Hàng 2: Kích thước phủ bì tổng thể (khoảng cách 25mm thoáng đãng)
+    const xDimChain = maxX + 18; // Cột 1: Chuỗi kích thước dọc chi tiết
+    const xDimTotal = xDimChain + 35; // Cột 2: Kích thước phủ bì chiều cao (cách 35mm ngăn hoàn toàn đè chữ số)
 
     // --- CHUỖI NGANG (Horizontal Chain) ---
     // Các mốc: Tai dán (-g -> 0), Mặt A (0 -> l), Mặt B (l -> l+w), Mặt C (l+w -> 2l+w), Mặt D (2l+w -> 2l+2w)
@@ -223,10 +223,10 @@ export function buildDimensionLines(
       const pMinY = fy - hVal;
       const pMaxY = fy + fh + hVal;
 
-      const yChain = pMinY - 12;
-      const yTotal = yChain - 18;
-      const xChain = pMaxX + 14;
-      const xTotal = xChain + 20;
+      const yChain = pMinY - 16;
+      const yTotal = yChain - 25;
+      const xChain = pMaxX + 18;
+      const xTotal = xChain + 35;
 
       // Chuỗi ngang: Tai góc trái (hVal) + Thân (fw) + Tai góc phải (hVal)
       createDimSegment([pMinX, yChain], [fx, yChain], formatDimValue(hVal, unit), 'horizontal', lines);
@@ -292,10 +292,10 @@ export function buildDimensionLines(
   const sortedX = Array.from(xCoords).sort((a, b) => a - b).filter((val, idx, arr) => idx === 0 || val - arr[idx - 1] > 6);
   const sortedY = Array.from(yCoords).sort((a, b) => a - b).filter((val, idx, arr) => idx === 0 || val - arr[idx - 1] > 6);
 
-  const yDimChain = minY - 12;
-  const yDimTotal = yDimChain - 18;
-  const xDimChain = maxX + 14;
-  const xDimTotal = xDimChain + 20;
+  const yDimChain = minY - 16;
+  const yDimTotal = yDimChain - 25;
+  const xDimChain = maxX + 18;
+  const xDimTotal = xDimChain + 35;
 
   // Chuỗi ngang
   for (let i = 0; i < sortedX.length - 1; i++) {

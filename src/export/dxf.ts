@@ -1,5 +1,4 @@
 // Xuất file DXF chuẩn AutoCAD R12 (AC1009) cho máy cắt bế CNC và phần mềm CAD
-import { chainSegments, type Polyline } from '../core/chain';
 import type { Dieline } from '../core/types';
 import type { DimensionLine } from '../render2d/dimensions';
 
@@ -21,24 +20,15 @@ export function generateDxfContent(
   let bMaxY = dieline.bbox[1] + dieline.bbox[3];
 
   for (const d of dimLines) {
-    if (d.start[0] < bMinX) bMinX = d.start[0];
-    if (d.start[1] < bMinY) bMinY = d.start[1];
-    if (d.start[0] > bMaxX) bMaxX = d.start[0];
-    if (d.start[1] > bMaxY) bMaxY = d.start[1];
-
-    if (d.end[0] < bMinX) bMinX = d.end[0];
-    if (d.end[1] < bMinY) bMinY = d.end[1];
-    if (d.end[0] > bMaxX) bMaxX = d.end[0];
-    if (d.end[1] > bMaxY) bMaxY = d.end[1];
+    bMinX = Math.min(bMinX, d.start[0], d.end[0], d.mid[0] - 10);
+    bMinY = Math.min(bMinY, d.start[1], d.end[1], d.mid[1] - 8);
+    bMaxX = Math.max(bMaxX, d.start[0], d.end[0], d.mid[0] + 10);
+    bMaxY = Math.max(bMaxY, d.start[1], d.end[1], d.mid[1] + 8);
   }
 
   const originX = bMinX - margin;
   const originY = bMinY - margin;
   const totalH = bMaxY - bMinY + margin * 2;
-
-  // Nối các đoạn rời thành polyline
-  const cutLines = chainSegments(dieline.cut);
-  const creaseLines = chainSegments(dieline.crease);
 
   const lines: string[] = [];
 
@@ -70,64 +60,48 @@ export function generateDxfContent(
   // 2. ENTITIES
   lines.push('0', 'SECTION', '2', 'ENTITIES');
 
-  function writePolyline(line: Polyline, layer: 'CUT' | 'CREASE') {
-    if (line.pts.length === 0) return;
-
-    // 70 = 1 nếu đóng (closed), 0 nếu hở
+  function writeLine(x1: number, y1: number, x2: number, y2: number, layer: 'CUT' | 'CREASE' | 'DIMENSION') {
     lines.push(
-      '0', 'POLYLINE',
+      '0', 'LINE',
       '8', layer,
-      '66', '1',
-      '70', line.closed ? '1' : '0'
+      '10', round3(x1).toString(),
+      '20', round3(y1).toString(),
+      '30', '0.0',
+      '11', round3(x2).toString(),
+      '21', round3(y2).toString(),
+      '31', '0.0'
     );
-
-    for (const pt of line.pts) {
-      // DXF có trục Y hướng lên trên: y' = totalH - (y - originY)
-      const x = round3(pt[0] - originX);
-      const y = round3(totalH - (pt[1] - originY));
-
-      lines.push(
-        '0', 'VERTEX',
-        '8', layer,
-        '10', x.toString(),
-        '20', y.toString(),
-        '30', '0.0'
-      );
-    }
-
-    lines.push('0', 'SEQEND', '8', layer);
   }
 
-  // Ghi các đường CREASE
-  for (const line of creaseLines) {
-    writePolyline(line, 'CREASE');
+  // Ghi từng đoạn CREASE riêng biệt (độc lập, dễ dàng chọn và chỉnh sửa trong CAD)
+  for (const seg of dieline.crease) {
+    const x1 = seg.a[0] - originX;
+    const y1 = totalH - (seg.a[1] - originY);
+    const x2 = seg.b[0] - originX;
+    const y2 = totalH - (seg.b[1] - originY);
+    writeLine(x1, y1, x2, y2, 'CREASE');
   }
 
-  // Ghi các đường CUT
-  for (const line of cutLines) {
-    writePolyline(line, 'CUT');
+  // Ghi từng đoạn CUT riêng biệt (độc lập, dễ dàng chọn và chỉnh sửa trong CAD)
+  for (const seg of dieline.cut) {
+    const x1 = seg.a[0] - originX;
+    const y1 = totalH - (seg.a[1] - originY);
+    const x2 = seg.b[0] - originX;
+    const y2 = totalH - (seg.b[1] - originY);
+    writeLine(x1, y1, x2, y2, 'CUT');
   }
 
   // Ghi các đường kích thước DIMENSION (nếu có)
   for (const dim of dimLines) {
-    const x1 = round3(dim.start[0] - originX);
-    const y1 = round3(totalH - (dim.start[1] - originY));
-    const x2 = round3(dim.end[0] - originX);
-    const y2 = round3(totalH - (dim.end[1] - originY));
+    const x1 = dim.start[0] - originX;
+    const y1 = totalH - (dim.start[1] - originY);
+    const x2 = dim.end[0] - originX;
+    const y2 = totalH - (dim.end[1] - originY);
     const xm = round3(dim.mid[0] - originX);
     const ym = round3(totalH - (dim.mid[1] - originY));
 
     // Đoạn thẳng đo kích thước
-    lines.push(
-      '0', 'LINE',
-      '8', 'DIMENSION',
-      '10', x1.toString(),
-      '20', y1.toString(),
-      '30', '0.0',
-      '11', x2.toString(),
-      '21', y2.toString(),
-      '31', '0.0'
-    );
+    writeLine(x1, y1, x2, y2, 'DIMENSION');
 
     // Chữ số đo kích thước (Text cao 3.5mm chuẩn bản vẽ kỹ thuật CAD)
     if (dim.label && dim.label.trim()) {

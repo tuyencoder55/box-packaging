@@ -23,13 +23,11 @@ describe('export/svg', () => {
     expect(svg).toContain('height="60mm"');
     expect(svg).toContain('viewBox="0 0 110 60"');
 
-    // Chứa 2 layer chuẩn
+    // Chứa 2 layer chuẩn và các thẻ line riêng biệt
     expect(svg).toContain('id="CUT"');
     expect(svg).toContain('id="CREASE"');
     expect(svg).toContain('stroke-dasharray="3 2"');
-
-    // Đường cắt khép kín có lệnh Z
-    expect(svg).toContain('Z');
+    expect(svg).toContain('<line');
   });
 
   it('sinh layer DIMENSION trong SVG khi truyền dimLines', () => {

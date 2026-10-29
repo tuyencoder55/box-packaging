@@ -1,28 +1,10 @@
 // Xuất file khuôn SVG chuẩn kỹ thuật (đơn vị mm, layer CUT/CREASE/DIMENSION)
-import { chainSegments, type Polyline } from '../core/chain';
+// Từng đoạn line được xuất riêng biệt giúp dễ dàng chọn và chỉnh sửa trong Adobe Illustrator & phần mềm CAD
 import type { Dieline } from '../core/types';
 import type { DimensionLine } from '../render2d/dimensions';
 
 function round3(n: number): number {
   return Math.round(n * 1000) / 1000;
-}
-
-function polylineToPathData(line: Polyline, originX: number, originY: number): string {
-  if (line.pts.length === 0) return '';
-  const parts: string[] = [];
-  const p0 = line.pts[0];
-  parts.push(`M ${round3(p0[0] - originX)} ${round3(p0[1] - originY)}`);
-
-  for (let i = 1; i < line.pts.length; i++) {
-    const pt = line.pts[i];
-    parts.push(`L ${round3(pt[0] - originX)} ${round3(pt[1] - originY)}`);
-  }
-
-  if (line.closed) {
-    parts.push('Z');
-  }
-
-  return parts.join(' ');
 }
 
 /**
@@ -39,15 +21,10 @@ export function generateSvgContent(
   let bMaxY = dieline.bbox[1] + dieline.bbox[3];
 
   for (const d of dimLines) {
-    if (d.start[0] < bMinX) bMinX = d.start[0];
-    if (d.start[1] < bMinY) bMinY = d.start[1];
-    if (d.start[0] > bMaxX) bMaxX = d.start[0];
-    if (d.start[1] > bMaxY) bMaxY = d.start[1];
-
-    if (d.end[0] < bMinX) bMinX = d.end[0];
-    if (d.end[1] < bMinY) bMinY = d.end[1];
-    if (d.end[0] > bMaxX) bMaxX = d.end[0];
-    if (d.end[1] > bMaxY) bMaxY = d.end[1];
+    bMinX = Math.min(bMinX, d.start[0], d.end[0], d.mid[0] - 10);
+    bMinY = Math.min(bMinY, d.start[1], d.end[1], d.mid[1] - 8);
+    bMaxX = Math.max(bMaxX, d.start[0], d.end[0], d.mid[0] + 10);
+    bMaxY = Math.max(bMaxY, d.start[1], d.end[1], d.mid[1] + 8);
   }
 
   // Lề quanh khuôn bế và đường kích thước
@@ -56,16 +33,19 @@ export function generateSvgContent(
   const totalW = round3(bMaxX - bMinX + margin * 2);
   const totalH = round3(bMaxY - bMinY + margin * 2);
 
-  // Nối các đoạn rời thành polyline liền
-  const cutLines = chainSegments(dieline.cut);
-  const creaseLines = chainSegments(dieline.crease);
-
-  const cutPaths = cutLines
-    .map((line) => `    <path d="${polylineToPathData(line, originX, originY)}" />`)
+  // Xuất từng đoạn thẳng riêng biệt (độc lập trong panel Layers của Illustrator)
+  const cutElements = dieline.cut
+    .map(
+      (s) =>
+        `    <line x1="${round3(s.a[0] - originX)}" y1="${round3(s.a[1] - originY)}" x2="${round3(s.b[0] - originX)}" y2="${round3(s.b[1] - originY)}" />`
+    )
     .join('\n');
 
-  const creasePaths = creaseLines
-    .map((line) => `    <path d="${polylineToPathData(line, originX, originY)}" />`)
+  const creaseElements = dieline.crease
+    .map(
+      (s) =>
+        `    <line x1="${round3(s.a[0] - originX)}" y1="${round3(s.a[1] - originY)}" x2="${round3(s.b[0] - originX)}" y2="${round3(s.b[1] - originY)}" />`
+    )
     .join('\n');
 
   let dimElements = '';
@@ -97,11 +77,11 @@ ${dimParts.join('\n')}
      viewBox="0 0 ${totalW} ${totalH}">
   <!-- Layer CREASE (Dao cấn / Đường gấp) -->
   <g id="CREASE" fill="none" stroke="#00aeef" stroke-width="0.25" stroke-dasharray="3 2">
-${creasePaths}
+${creaseElements}
   </g>
   <!-- Layer CUT (Dao cắt bế ngoài) -->
   <g id="CUT" fill="none" stroke="#ff00ff" stroke-width="0.25">
-${cutPaths}
+${cutElements}
   </g>
 ${dimElements}</svg>`;
 }

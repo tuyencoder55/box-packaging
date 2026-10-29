@@ -50,21 +50,16 @@ export function dielineToSvgData(dieline: Dieline, pad = 25, dimLines: Dimension
   }
 
   for (const d of dimLines) {
-    if (d.start[0] < minX) minX = d.start[0];
-    if (d.start[1] < minY) minY = d.start[1];
-    if (d.start[0] > maxX) maxX = d.start[0];
-    if (d.start[1] > maxY) maxY = d.start[1];
-
-    if (d.end[0] < minX) minX = d.end[0];
-    if (d.end[1] < minY) minY = d.end[1];
-    if (d.end[0] > maxX) maxX = d.end[0];
-    if (d.end[1] > maxY) maxY = d.end[1];
+    minX = Math.min(minX, d.start[0], d.end[0], d.mid[0] - 25);
+    minY = Math.min(minY, d.start[1], d.end[1], d.mid[1] - 18);
+    maxX = Math.max(maxX, d.start[0], d.end[0], d.mid[0] + 30);
+    maxY = Math.max(maxY, d.start[1], d.end[1], d.mid[1] + 18);
   }
 
-  const padLeft = Math.max(pad, 20);
-  const padRight = Math.max(pad, 30);
-  const padTop = Math.max(pad, 30);
-  const padBottom = Math.max(pad, 20);
+  const padLeft = Math.max(pad, 25);
+  const padRight = Math.max(pad, 35);
+  const padTop = Math.max(pad, 35);
+  const padBottom = Math.max(pad, 25);
 
   const vx = minX - padLeft;
   const vy = minY - padTop;
