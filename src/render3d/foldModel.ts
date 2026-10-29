@@ -96,6 +96,39 @@ export function buildFoldModel(panels: LayoutPanel[]): FoldModelResult {
     const group = groupMap.get(p.node.id)!;
     group.add(mesh);
 
+    // 1. Đường viền dao cắt bao quanh panel (cạnh giấy carton đậm rõ nét)
+    const edgeGeo = new THREE.EdgesGeometry(geo);
+    geometries.push(edgeGeo);
+    const edgeMat = new THREE.LineBasicMaterial({
+      color: 0x3d352b, // Viền cạnh cắt sắc nét
+      linewidth: 1.5,
+    });
+    materials.push(edgeMat);
+    const edgeLine = new THREE.LineSegments(edgeGeo, edgeMat);
+    edgeLine.position.z = 0.15; // Nổi nhẹ trên bề mặt để tránh z-fighting
+    group.add(edgeLine);
+
+    // 2. Đường nếp cấn (đường gấp bản lề) nét đứt màu đỏ nổi bật
+    if (p.baseSeg) {
+      const dx = p.baseSeg.b[0] - p.baseSeg.a[0];
+      const dy = -(p.baseSeg.b[1] - p.baseSeg.a[1]);
+      const creaseGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0.3),
+        new THREE.Vector3(dx, dy, 0.3),
+      ]);
+      geometries.push(creaseGeo);
+      const creaseMat = new THREE.LineDashedMaterial({
+        color: 0xef4444, // Màu đỏ nếp cấn rõ nét
+        dashSize: 4,
+        gapSize: 2.5,
+        linewidth: 2,
+      });
+      materials.push(creaseMat);
+      const creaseLine = new THREE.Line(creaseGeo, creaseMat);
+      creaseLine.computeLineDistances();
+      group.add(creaseLine);
+    }
+
     // Xác định trục xoay và hướng xoay (sign)
     // fold 90° nghĩa là gập về phía sau (-Z)
     let axis: 'x' | 'y' = 'y';

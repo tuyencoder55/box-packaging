@@ -53,18 +53,39 @@ function initStudio() {
 
   const store = createStore<AppDocState>(initialStore);
 
-  // Thiết lập thanh top-bar
+  // Thiết lập thanh top-bar cao cấp, bo góc tinh tế
   const topBar = document.getElementById('top-bar');
   if (topBar) {
     topBar.style.cssText =
-      'display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 50px; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); gap: 12px;';
+      'display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 56px; background: #181b22; border-bottom: 1px solid rgba(255, 255, 255, 0.08); gap: 14px;';
   }
 
   // Tinh chỉnh link Thư viện và dropdown chọn hộp
   const backLink = topBar?.querySelector('a');
   if (backLink) {
-    backLink.style.cssText =
-      'color: var(--text-secondary); text-decoration: none; font-size: var(--font-size-sm); font-weight: 500; white-space: nowrap;';
+    backLink.style.cssText = `
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.15s ease;
+    `;
+    backLink.addEventListener('mouseenter', () => {
+      backLink.style.background = 'rgba(255, 255, 255, 0.08)';
+      backLink.style.color = 'var(--text-main)';
+    });
+    backLink.addEventListener('mouseleave', () => {
+      backLink.style.background = 'rgba(255, 255, 255, 0.04)';
+      backLink.style.color = 'var(--text-secondary)';
+    });
   }
 
   // Thay thế hoặc gắn bộ chọn hộp vào topBar
@@ -72,20 +93,21 @@ function initStudio() {
   let metaSpan: HTMLElement | null = null;
   if (titleEl) {
     titleEl.innerHTML = '';
-    titleEl.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+    titleEl.style.cssText = 'display: flex; align-items: center; gap: 10px;';
 
     const select = document.createElement('select');
     select.id = 'box-select';
     select.style.cssText = `
-      background: var(--bg-card);
-      color: var(--text-primary);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 6px 10px;
-      font-size: var(--font-size-sm);
+      background: #20242e;
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       outline: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     `;
 
     const allBoxes = getAllBoxes();
@@ -103,7 +125,15 @@ function initStudio() {
 
     metaSpan = document.createElement('span');
     metaSpan.id = 'doc-meta';
-    metaSpan.style.cssText = 'font-size: var(--font-size-xs); color: var(--text-secondary);';
+    metaSpan.style.cssText = `
+      font-size: 12px;
+      color: var(--text-muted);
+      background: #20242e;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    `;
 
     titleEl.appendChild(select);
     titleEl.appendChild(metaSpan);
@@ -111,18 +141,19 @@ function initStudio() {
 
   const saveStatus = document.getElementById('save-status');
   if (saveStatus) {
-    saveStatus.style.cssText = 'font-size: var(--font-size-xs); color: var(--text-muted); margin-left: 4px;';
+    saveStatus.style.cssText =
+      'font-size: 11px; font-weight: 600; color: var(--color-primary); display: flex; align-items: center; gap: 5px;';
+    saveStatus.innerHTML = '<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--color-primary);"></span> Đã lưu';
   }
 
   // Thiết lập bố cục khung làm việc
   const workspace = document.getElementById('workspace');
   if (workspace) {
-    workspace.style.cssText = 'display: flex; height: calc(100vh - 50px); overflow: hidden; position: relative;';
+    workspace.style.cssText = 'display: flex; height: calc(100vh - 56px); overflow: hidden; position: relative;';
   }
 
   const paramContainer = document.getElementById('param-panel');
   if (paramContainer) {
-    paramContainer.style.width = '280px';
     initParamPanel(paramContainer, store, boxDef);
   }
 
@@ -187,8 +218,32 @@ function initStudio() {
 
   const btnExport = document.getElementById('btn-export');
   if (btnExport) {
-    btnExport.style.cssText =
-      'background: var(--accent); color: var(--accent-text); border: none; padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer;';
+    btnExport.style.cssText = `
+      background: var(--color-primary);
+      color: var(--color-primary-fg);
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 210, 135, 0.25);
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    `;
+    btnExport.innerHTML = '<span>Xuất file</span> <span style="font-size:14px;">↓</span>';
+
+    btnExport.addEventListener('mouseenter', () => {
+      btnExport.style.transform = 'translateY(-1px)';
+      btnExport.style.boxShadow = '0 4px 14px rgba(0, 210, 135, 0.35)';
+    });
+    btnExport.addEventListener('mouseleave', () => {
+      btnExport.style.transform = 'translateY(0)';
+      btnExport.style.boxShadow = '0 2px 10px rgba(0, 210, 135, 0.25)';
+    });
+
     btnExport.addEventListener('click', () => {
       if (currentDieline) {
         openExportModal(store.get(), currentDieline, () => mockupContainer?.querySelector('canvas') ?? null);
