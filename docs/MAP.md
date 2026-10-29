@@ -51,7 +51,8 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ app/paramPanel.ts — panel tham số bên trái
 - ✅ app/legend.ts — bảng chú giải dao cắt/cấn
 - ✅ app/stepBar.ts — thanh chuyển 3 bước Dieline/3D/Xuất
-- ⬜ app/mockupCard.ts · exportModal.ts
+- ✅ app/mockupCard.ts — thẻ nổi và chế độ xem 3D toàn màn hình
+- ⬜ app/exportModal.ts — modal xuất file
 - ✅ templates/cardGrid.ts · filterBar.ts
 - ⬜ templates/detailModal.ts
 

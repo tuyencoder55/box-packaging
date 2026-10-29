@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P4 (xong P4.3, chuẩn bị P4.4)
+Đang ở: Hoàn thành Phase P4 (chuẩn bị sang P5)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -29,12 +29,12 @@
   - [x] P3.4 boxes/auto-lock-bottom.ts + test
   - [x] P3.5 ui/templates/* + pages/templates.ts (lưới thẻ, lọc nhóm)
   - [x] P3.6 Nút "Dùng mẫu này" + bộ chọn loại hộp trong Studio
-- [ ] P4 Mockup 3D
+- [x] P4 Mockup 3D
   - [x] P4.1 render3d/scene.ts (khung 3D, camera, đèn, điều khiển chuột) + test
-  - [x] P4.2 render3d/foldModel.ts (cây panel → hộp 3D lồng nhau)
-  - [x] P4.3 render3d/foldAnim.ts (thanh trượt gấp/mở theo step)
-  - [ ] P4.4 ui/app/mockupCard.ts (thẻ nổi góc phải + phóng to xem 3D)
-  - [ ] P4.5 Kết nối vào trang app.html và templates.html
+  - [x] P4.2 render3d/foldModel.ts (cây panel → hộp 3D lồng nhau) + test
+  - [x] P4.3 render3d/foldAnim.ts (thanh trượt gấp/mở theo step) + test
+  - [x] P4.4 ui/app/mockupCard.ts (thẻ nổi góc phải + phóng to xem 3D)
+  - [x] P4.5 Kết nối vào trang app.html qua stepBar và đồng bộ thời gian thực
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
 - [ ] P4 Mockup 3D
 - [ ] P4b Màu và ảnh lên mặt hộp 3D
@@ -76,3 +76,4 @@
 - 2026-10-29 P4.1: render3d/scene.ts thiết lập khung cảnh 3D, camera, đèn và điều khiển chuột (48 tests xanh)
 - 2026-10-29 P4.2: render3d/foldModel.ts dựng cây bản lề THREE.Group lồng nhau cho hộp 3D (49 tests xanh)
 - 2026-10-29 P4.3: render3d/foldAnim.ts hoạt hoạ gấp/mở theo step và thanh trượt tiến độ (52 tests xanh)
+- 2026-10-29 P4.4 & P4.5: ui/app/mockupCard.ts thẻ nổi 3D, tích hợp stepBar chuyển đổi dieline 2D/3D toàn màn hình, hoàn thành Phase P4 (52 tests xanh)

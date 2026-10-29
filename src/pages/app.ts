@@ -8,6 +8,7 @@ import { calcEffectiveParams } from '../core/thickness';
 import { buildDimensionLines } from '../render2d/dimensions';
 import { renderSvgView } from '../render2d/svgView';
 import { setupZoomPan, type ZoomPanController } from '../render2d/zoomPan';
+import { initMockupCard, type MockupCardController } from '../ui/app/mockupCard';
 import { initParamPanel, type AppDocState } from '../ui/app/paramPanel';
 import { createStepBar, type StepId } from '../ui/app/stepBar';
 
@@ -111,25 +112,10 @@ function initStudio() {
     saveStatus.style.cssText = 'font-size: var(--font-size-xs); color: var(--text-muted); margin-left: 4px;';
   }
 
-  const stepBarContainer = document.getElementById('step-bar');
-  if (stepBarContainer) {
-    stepBarContainer.appendChild(
-      createStepBar('dieline', (step: StepId) => {
-        console.log('Chuyển sang bước:', step);
-      })
-    );
-  }
-
-  const btnExport = document.getElementById('btn-export');
-  if (btnExport) {
-    btnExport.style.cssText =
-      'background: var(--accent); color: var(--accent-text); border: none; padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer;';
-  }
-
   // Thiết lập bố cục khung làm việc
   const workspace = document.getElementById('workspace');
   if (workspace) {
-    workspace.style.cssText = 'display: flex; height: calc(100vh - 50px); overflow: hidden;';
+    workspace.style.cssText = 'display: flex; height: calc(100vh - 50px); overflow: hidden; position: relative;';
   }
 
   const paramContainer = document.getElementById('param-panel');
@@ -141,7 +127,62 @@ function initStudio() {
   const viewport = document.getElementById('viewport-2d');
   if (viewport) {
     viewport.style.cssText =
-      'flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;';
+      'flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative;';
+  }
+
+  // Khởi tạo thẻ nổi Mockup 3D
+  const mockupContainer = document.getElementById('mockup-card');
+  let mockupController: MockupCardController | null = null;
+
+  function switchStep(newStep: StepId) {
+    if (newStep === 'mockup') {
+      if (viewport) viewport.style.display = 'none';
+      if (mockupContainer) {
+        mockupContainer.style.display = 'block';
+        mockupContainer.style.flex = '1';
+        mockupContainer.style.height = '100%';
+      }
+      mockupController?.setMode('fullscreen');
+    } else if (newStep === 'dieline') {
+      if (viewport) viewport.style.display = 'flex';
+      if (mockupContainer) {
+        mockupContainer.style.display = 'block';
+        mockupContainer.style.flex = 'none';
+        mockupContainer.style.height = 'auto';
+      }
+      mockupController?.setMode('pip');
+    }
+  }
+
+  const stepBarContainer = document.getElementById('step-bar');
+  if (stepBarContainer) {
+    stepBarContainer.appendChild(
+      createStepBar('dieline', (step: StepId) => {
+        switchStep(step);
+      })
+    );
+  }
+
+  if (mockupContainer) {
+    mockupController = initMockupCard(mockupContainer, store, boxDef, () => {
+      // Phóng to sang bước 3D
+      const mockupBtn = stepBarContainer?.querySelector('[data-step="mockup"]') as HTMLButtonElement | null;
+      if (mockupBtn) {
+        mockupBtn.click();
+      } else {
+        switchStep('mockup');
+      }
+    });
+  }
+
+  const btnExport = document.getElementById('btn-export');
+  if (btnExport) {
+    btnExport.style.cssText =
+      'background: var(--accent); color: var(--accent-text); border: none; padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer;';
+    btnExport.addEventListener('click', () => {
+      const exportBtn = stepBarContainer?.querySelector('[data-step="export"]') as HTMLButtonElement | null;
+      exportBtn?.click();
+    });
   }
 
   let zoomController: ZoomPanController | null = null;
@@ -165,58 +206,34 @@ function initStudio() {
         zoomController = setupZoomPan(viewport, svg);
       }
     }
+
+    // Đồng bộ sang mô hình 3D
+    mockupController?.updateModel(s, boxDef);
   }
 
-  let saveTimer: number | undefined;
-  function triggerSave(currentState: AppDocState) {
-    if (saveStatus) saveStatus.textContent = 'Đang lưu...';
-    clearTimeout(saveTimer);
-    saveTimer = window.setTimeout(() => {
-      try {
-        localStorage.setItem('boxmaker:doc', JSON.stringify(currentState));
-        if (saveStatus) saveStatus.textContent = 'Đã lưu';
-      } catch (e) {
-        console.error('Không thể lưu vào localStorage:', e);
-      }
-    }, 300);
-  }
-
-  // Lắng nghe thay đổi kích thước và tham số từ Store
+  updateDielineView(store.get());
   store.subscribe(
-    (s) => ({
-      l: s.l,
-      w: s.w,
-      h: s.h,
-      t: s.t,
-      unit: s.unit,
-      sizeType: s.sizeType,
-      compensate: s.compensate,
-      orient: s.orient,
-      opts: s.opts,
-    }),
-    () => {
-      const current = store.get();
-      updateDielineView(current);
-      triggerSave(current);
-    },
-    (a, b) =>
-      a.l === b.l &&
-      a.w === b.w &&
-      a.h === b.h &&
-      a.t === b.t &&
-      a.unit === b.unit &&
-      a.sizeType === b.sizeType &&
-      a.compensate === b.compensate &&
-      a.orient === b.orient &&
-      JSON.stringify(a.opts) === JSON.stringify(b.opts)
+    (s) => s,
+    (s) => updateDielineView(s)
   );
 
-  // Vẽ lần đầu
-  updateDielineView(store.get());
+  // Tự động lưu trạng thái vào localStorage khi có thay đổi (debounce 300ms)
+  let saveTimer: ReturnType<typeof setTimeout> | null = null;
+  store.subscribe(
+    (s) => s,
+    (state) => {
+      if (saveStatus) saveStatus.textContent = 'Đang lưu...';
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        try {
+          localStorage.setItem('boxmaker:doc', JSON.stringify(state));
+          if (saveStatus) saveStatus.textContent = 'Đã lưu';
+        } catch (err) {
+          console.warn('Lỗi lưu document vào localStorage:', err);
+        }
+      }, 300);
+    }
+  );
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initStudio);
-} else {
-  initStudio();
-}
+document.addEventListener('DOMContentLoaded', initStudio);
