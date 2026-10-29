@@ -33,7 +33,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 
 ## src/render2d
 - ✅ svgView.ts — vẽ khuôn SVG
-- ⬜ dimensions.ts — đường kích thước + nhãn
+- ✅ dimensions.ts — đường kích thước + nhãn
 - ⬜ zoomPan.ts — zoom, kéo
 
 ## src/render3d
@@ -49,7 +49,8 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 ## src/ui
 - ✅ dom.ts — helper tạo DOM el()
 - ✅ app/paramPanel.ts — panel tham số bên trái
-- ⬜ app/stepBar.ts · legend.ts · mockupCard.ts · exportModal.ts
+- ✅ app/legend.ts — bảng chú giải dao cắt/cấn
+- ⬜ app/stepBar.ts · mockupCard.ts · exportModal.ts
 - ⬜ templates/cardGrid.ts · filterBar.ts · detailModal.ts
 
 ## src/pages

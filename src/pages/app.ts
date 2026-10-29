@@ -4,6 +4,7 @@ import { buildDieline } from '../core/dieline';
 import { layoutPanels } from '../core/layout';
 import { createStore } from '../core/store';
 import { calcEffectiveParams } from '../core/thickness';
+import { buildDimensionLines } from '../render2d/dimensions';
 import { renderSvgView } from '../render2d/svgView';
 import { initParamPanel, type AppDocState } from '../ui/app/paramPanel';
 
@@ -63,9 +64,10 @@ function initStudio() {
     const nodes = boxDef.build(effectiveParams);
     const layouts = layoutPanels(nodes);
     const dieline = buildDieline(layouts);
+    const dimLines = buildDimensionLines(boxDef.dims, layouts, { l: s.l, w: s.w, h: s.h }, s.unit);
 
     if (viewport) {
-      renderSvgView(viewport, dieline);
+      renderSvgView(viewport, dieline, dimLines);
     }
   }
 
