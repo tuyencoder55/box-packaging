@@ -11,8 +11,16 @@ export function el<K extends keyof HTMLElementTagNameMap>(
     if (value === undefined || value === null) continue;
     if (key === 'className' || key === 'class') {
       element.className = String(value);
-    } else if (key === 'style' && typeof value === 'object') {
-      Object.assign(element.style, value);
+    } else if (key === 'text' || key === 'textContent') {
+      element.textContent = String(value);
+    } else if (key === 'html' || key === 'innerHTML') {
+      element.innerHTML = String(value);
+    } else if (key === 'style') {
+      if (typeof value === 'object') {
+        Object.assign(element.style, value);
+      } else {
+        element.style.cssText = String(value);
+      }
     } else if (key.startsWith('on') && typeof value === 'function') {
       const eventName = key.slice(2).toLowerCase();
       element.addEventListener(eventName, value as EventListener);

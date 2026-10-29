@@ -54,7 +54,12 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-  container.appendChild(renderer.domElement);
+  const domEl = renderer.domElement;
+  domEl.style.width = '100%';
+  domEl.style.height = '100%';
+  domEl.style.display = 'block';
+
+  container.appendChild(domEl);
 
   // Nhóm gốc chứa mô hình hộp
   const rootGroup = new THREE.Group();
@@ -100,7 +105,6 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
     render();
   };
 
-  const domEl = renderer.domElement;
   domEl.addEventListener('mousedown', onMouseDown);
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
@@ -118,7 +122,22 @@ export function create3DScene(container: HTMLElement): Scene3DContext {
     render();
   };
 
+  // Tự động nhận diện thay đổi kích thước container
+  let resizeObserver: ResizeObserver | null = null;
+  if (typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const cr = entry.contentRect;
+        if (cr.width > 0 && cr.height > 0) {
+          resize(cr.width, cr.height);
+        }
+      }
+    });
+    resizeObserver.observe(container);
+  }
+
   const dispose = () => {
+    resizeObserver?.disconnect();
     domEl.removeEventListener('mousedown', onMouseDown);
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('mouseup', onMouseUp);

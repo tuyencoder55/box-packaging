@@ -141,9 +141,11 @@ function initStudio() {
     if (newStep === 'mockup') {
       if (viewport) viewport.style.display = 'none';
       if (mockupContainer) {
-        mockupContainer.style.display = 'block';
+        mockupContainer.style.display = 'flex';
+        mockupContainer.style.flexDirection = 'column';
         mockupContainer.style.flex = '1';
         mockupContainer.style.height = '100%';
+        mockupContainer.style.width = '100%';
       }
       mockupController?.setMode('fullscreen');
     } else if (newStep === 'dieline') {
@@ -152,6 +154,7 @@ function initStudio() {
         mockupContainer.style.display = 'block';
         mockupContainer.style.flex = 'none';
         mockupContainer.style.height = 'auto';
+        mockupContainer.style.width = 'auto';
       }
       mockupController?.setMode('pip');
     } else if (newStep === 'export') {

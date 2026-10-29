@@ -1,6 +1,19 @@
 /* Base Styles — Reset và kiểu cơ bản cho toàn ứng dụng */
 @import './tokens.css';
 
+:root {
+  /* Alias tiện ích đồng bộ giao diện */
+  --text-primary: var(--text-main);
+  --text-secondary: var(--text-muted);
+  --color-primary: var(--accent);
+  --color-primary-hover: var(--accent-hover);
+  --color-primary-fg: var(--accent-text);
+  --bg-card: var(--bg-surface);
+  --bg-base: var(--bg-app);
+  --radius-full: 9999px;
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }

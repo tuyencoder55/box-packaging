@@ -1,4 +1,5 @@
 // Component thẻ Mockup 3D (Floating Card & Fullscreen Viewport)
+import * as THREE from 'three';
 import { layoutPanels } from '../../core/layout';
 import type { Store } from '../../core/store';
 import { calcEffectiveParams } from '../../core/thickness';
@@ -178,6 +179,14 @@ export function initMockupCard(
       slider.value = '100';
       progressLabel.textContent = '100%';
       btnToggle.textContent = 'Mở';
+
+      // Căn giữa hộp 3D tại tâm gốc toạ độ sau khi gập
+      currentModel.rootGroup.updateMatrixWorld(true);
+      const foldedBox = new THREE.Box3().setFromObject(currentModel.rootGroup);
+      const foldedCenter = new THREE.Vector3();
+      foldedBox.getCenter(foldedCenter);
+      currentModel.rootGroup.position.sub(foldedCenter);
+
       sceneCtx.render();
     } catch (e) {
       console.error('Lỗi dựng mô hình 3D:', e);
@@ -216,6 +225,7 @@ export function initMockupCard(
       card.style.bottom = '0';
       card.style.width = '100%';
       card.style.height = '100%';
+      card.style.flex = '1';
       card.style.borderRadius = '0';
       card.style.border = 'none';
       btnExpand.style.display = 'none';
@@ -226,15 +236,19 @@ export function initMockupCard(
       card.style.bottom = '20px';
       card.style.width = '280px';
       card.style.height = '220px';
+      card.style.flex = 'none';
       card.style.borderRadius = 'var(--radius-lg)';
       card.style.border = '1px solid var(--border-subtle)';
       btnExpand.style.display = 'block';
       headerTitle.textContent = 'Mô phỏng 3D';
     }
 
-    setTimeout(() => {
-      sceneCtx.resize(canvasWrap.clientWidth, canvasWrap.clientHeight);
-    }, 50);
+    // Buộc renderer tính toán lại kích thước khung nhìn mới
+    requestAnimationFrame(() => {
+      if (canvasWrap.clientWidth > 0 && canvasWrap.clientHeight > 0) {
+        sceneCtx.resize(canvasWrap.clientWidth, canvasWrap.clientHeight);
+      }
+    });
   };
 
   const dispose = () => {
@@ -248,3 +262,4 @@ export function initMockupCard(
     dispose,
   };
 }
+

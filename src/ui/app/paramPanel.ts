@@ -25,7 +25,7 @@ export function initParamPanel(
 ): void {
   container.innerHTML = '';
   container.style.cssText =
-    'display: flex; flex-direction: column; gap: 14px; padding: 16px; background-color: var(--bg-surface); border-right: 1px solid var(--border-subtle); overflow-y: auto;';
+    'width: 280px; min-width: 280px; max-width: 280px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; padding: 16px; background-color: var(--bg-surface); border-right: 1px solid var(--border-subtle); overflow-y: auto;';
 
   const state = store.get();
 
