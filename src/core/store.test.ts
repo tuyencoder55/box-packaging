@@ -53,3 +53,4 @@ describe('store', () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 });
+

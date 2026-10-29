@@ -46,3 +46,4 @@ export function formatUnit(val: number, unit: Unit, decimals = 1): string {
   const rounded = Number(val.toFixed(decimals));
   return `${rounded} ${unit}`;
 }
+

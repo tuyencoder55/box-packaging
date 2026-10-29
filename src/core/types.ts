@@ -63,3 +63,4 @@ export interface Dieline {
   polys: Pt[][];
   bbox: [number, number, number, number];
 }
+

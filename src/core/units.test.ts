@@ -37,3 +37,4 @@ describe('units', () => {
     expect(formatUnit(2.5, 'inch', 1)).toBe('2.5 inch');
   });
 });
+

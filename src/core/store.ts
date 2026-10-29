@@ -69,3 +69,4 @@ export function createStore<T extends object>(initialState: T): Store<T> {
     },
   };
 }
+
