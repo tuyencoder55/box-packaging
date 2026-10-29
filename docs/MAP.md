@@ -44,7 +44,8 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 ## src/export
 - ⬜ pdfWriter.ts — bộ ghi PDF tối thiểu tự viết (layer, màu pha, nét đứt)
 - ⬜ pdf.ts · ai.ts — PDF và AI (cùng pdfWriter)
-- ⬜ dxf.ts · png.ts
+- ✅ dxf.ts
+- ⬜ png.ts
 - ✅ svg.ts · download.ts
 
 ## src/ui
