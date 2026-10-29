@@ -50,6 +50,11 @@ Quy tắc: bộ phận là hàm thuần `(args) => PanelNode[]`, gắn vào pane
 | crash-lock-hang-tab | Hộp tai treo đáy khoá tự động | 3 | 75×40×120 | Packfino ECMA A60 | ✅ |
 | tuck-top-glued-bottom | Hộp nắp gài trên đáy dán keo | 2 | 80×50×140 | Packfino ECMA A20/A10 | ✅ |
 | seal-end-carton | Hộp dán keo hai đầu | 2 | 100×50×150 | Packfino ECMA A10.20 | ✅ |
+| cube-tissue-box | Hộp khăn giấy vuông | 2 | 112×112×132 | Packfino Seal End Dispenser | ✅ |
+| flat-tissue-box | Hộp khăn giấy chữ nhật | 2 | 230×115×70 | Packfino Flat Seal End Dispenser | ✅ |
+| dispenser-box | Hộp chia sản phẩm (Dispenser) | 2 | 150×75×100 | Packfino ECMA A20.20 + Dispenser | ✅ |
+| tea-bag-box | Hộp đựng gói trà | 2 | 140×70×76 | Packfino ECMA A20/A10 | ✅ |
+| window-tuck-end | Hộp nắp gài có cửa sổ | 2 | 100×50×150 | Packfino ECMA A20.20 + Window | ✅ |
 
 (Thêm dòng mới ở cuối bảng khi người dùng cung cấp mẫu.)
 

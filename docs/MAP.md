@@ -34,6 +34,11 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ crash-lock-hang-tab.ts — hộp tai treo đáy khoá tự động
 - ✅ tuck-top-glued-bottom.ts — hộp nắp gài trên đáy dán keo
 - ✅ seal-end-carton.ts — hộp dán keo hai đầu
+- ✅ cube-tissue-box.ts — hộp khăn giấy vuông
+- ✅ flat-tissue-box.ts — hộp khăn giấy chữ nhật
+- ✅ dispenser-box.ts — hộp chia sản phẩm (dispenser)
+- ✅ tea-bag-box.ts — hộp đựng gói trà
+- ✅ window-tuck-end.ts — hộp nắp gài có cửa sổ
 
 - ⬜ parts/*.ts — bộ phận dùng chung giữa các hộp (tuckLid, dustFlap, autoLockBottom, glueFlap…), mỗi file một bộ phận
 

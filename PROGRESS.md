@@ -96,3 +96,4 @@
 - 2026-10-29 P6.1 & P6.2: Hoàn thiện trang chủ index.html, pages/home.ts và kiểm tra build tĩnh dist/ thành công 100%
 - 2026-10-29 P3b.Tuck: Nhập 4 mẫu hộp nắp gài mới từ Packfino (snap-lock-bottom, hang-tab-tuck-end, tuck-top-glued-bottom, seal-end-carton) + 4 unit tests (82 tests xanh 100%)
 - 2026-10-29 P3b.TuckHangTab: Thêm 2 mẫu tai treo đáy khoá (snap-lock-hang-tab, crash-lock-hang-tab) + 2 unit tests (88 tests xanh 100%)
+- 2026-10-29 P3b.TuckAll: Hoàn thành toàn bộ các mẫu hộp thuộc tab Tuck End Boxes từ Packfino (cube-tissue-box, flat-tissue-box, dispenser-box, tea-bag-box, window-tuck-end) + 5 unit tests (98 tests xanh 100%)
