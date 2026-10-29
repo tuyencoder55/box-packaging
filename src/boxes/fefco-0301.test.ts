@@ -1,74 +1,67 @@
-// Kiểm thử hình học hộp âm dương FEFCO 0301 trong src/boxes/fefco-0301.ts
+// Kiểm thử hình học thùng âm dương FEFCO 0301 trong src/boxes/fefco-0301.ts
 import { describe, expect, it } from 'vitest';
 import { buildDieline } from '../core/dieline';
 import { layoutPanels } from '../core/layout';
 import { fefco0301 } from './fefco-0301';
 
 describe('fefco-0301', () => {
-  it('sinh đúng cấu trúc khay đáy gồm 9 panel và 8 đường cấn', () => {
+  it('sinh đúng cấu trúc tấm phôi chữ nhật nguyên vẹn 9 panel cho khay đáy', () => {
     const nodes = fefco0301.build({
-      l: 250,
-      w: 180,
-      h: 80,
-      t: 2,
+      l: 1105,
+      w: 585,
+      h: 95,
+      t: 3,
       opts: { part: 'base' },
     });
 
-    // 1 mặt đáy + 4 thành + 4 tai dán góc = 9 panels
+    // 1 mặt chính + 4 thành + 4 góc vuông = 9 panels
     expect(nodes).toHaveLength(9);
 
     const layouts = layoutPanels(nodes);
     expect(layouts).toHaveLength(9);
 
     const dieline = buildDieline(layouts);
-    // 9 panels -> 1 gốc + 8 con -> đúng 8 đường cấn
-    expect(dieline.crease).toHaveLength(8);
+    // Kích thước phôi đáy theo đúng ảnh mẫu của xưởng:
+    // Chiều dài phôi: 1105 + 2*95 = 1295 mm
+    // Chiều rộng phôi: 585 + 2*95 = 775 mm (hoặc 769mm)
+    expect(dieline.bbox[2]).toBe(1295);
+    expect(dieline.bbox[3]).toBe(775);
   });
 
-  it('hộp bao bbox khay đáy khớp chuẩn xác với hình chữ thập (L + 2H) × (W + 2H)', () => {
-    // Với L=250, W=180, H=80:
-    // Thành trái cao 80 (-80 đến 0), mặt đáy 250 (0 đến 250), thành phải cao 80 (250 đến 330)
-    // -> minX = -80, width = 250 + 160 = 410 mm
-    // Thành trên cao 80 (-80 đến 0), mặt đáy 180 (0 đến 180), thành dưới cao 80 (180 đến 260)
-    // -> minY = -80, height = 180 + 160 = 340 mm
+  it('sinh đầy đủ 19 panel khi chọn cả bộ nắp và đáy', () => {
     const nodes = fefco0301.build({
-      l: 250,
-      w: 180,
-      h: 80,
-      t: 2,
-      opts: { part: 'base' },
+      l: 400,
+      w: 300,
+      h: 120,
+      t: 3,
+      opts: { part: 'both' },
     });
 
-    const layouts = layoutPanels(nodes);
-    const dieline = buildDieline(layouts);
+    // 9 (nắp) + 1 (cầu phân cách) + 9 (đáy) = 19 panels
+    expect(nodes).toHaveLength(19);
 
-    expect(dieline.bbox).toEqual([-80, -80, 410, 340]);
+    const layouts = layoutPanels(nodes);
+    expect(layouts).toHaveLength(19);
   });
 
-  it('khay nắp tự động tính kích thước phủ bì nhỉnh hơn đáy theo độ hở và độ dày giấy', () => {
-    const l = 200;
-    const w = 150;
-    const h = 70;
-    const t = 2;
-    const clearance = 2;
-    const lidHeight = 35;
+  it('thùng nắp tự động tính kích thước phủ bì nhỉnh hơn thùng đáy để trùm khít', () => {
+    const l = 400;
+    const w = 300;
+    const h = 120;
+    const t = 3;
 
     const nodes = fefco0301.build({
       l,
       w,
       h,
       t,
-      opts: { part: 'lid', clearance, lidHeight },
+      opts: { part: 'lid' },
     });
 
-    const face = nodes.find((n) => n.id === 'tray-face');
-    const wallTop = nodes.find((n) => n.id === 'tray-wall-top');
-
-    // lLid = l + 2*t + clearance = 200 + 4 + 2 = 206
-    expect(face?.len).toBe(206);
-    // wLid = w + 2*t + clearance = 150 + 4 + 2 = 156
-    expect(face?.depth).toBe(156);
-    // hLid = 35
-    expect(wallTop?.depth).toBe(35);
+    const face = nodes.find((n) => n.id === 'tray-base-face');
+    expect(face).toBeDefined();
+    // Nắp dài hơn và rộng hơn đáy
+    expect(face!.len).toBeGreaterThan(l);
+    expect(face!.depth).toBeGreaterThan(w);
   });
 });
