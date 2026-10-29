@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P2 (xong P2.1, chuẩn bị P2.2)
+Đang ở: P2 (xong P2.2, chuẩn bị P2.3)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -17,7 +17,7 @@
   - [x] P1.5 render2d/svgView.ts vẽ khuôn vào app.html + fit khung
 - [ ] P2 Studio 2D
   - [x] P2.1 ui/app/paramPanel.ts (panel trái tự động, bắt lỗi) + dom.ts
-  - [ ] P2.2 core/thickness.ts + nối vào luồng dữ liệu
+  - [x] P2.2 core/thickness.ts + nối vào luồng dữ liệu
   - [ ] P2.3 render2d/dimensions.ts + ui/app/legend.ts
   - [ ] P2.4 render2d/zoomPan.ts + thanh zoom %
   - [ ] P2.5 core/orient.ts + nút Chuẩn/Lật/Xoay
@@ -50,3 +50,4 @@
 - 2026-10-29 P1.4: boxes/fefco-0201.ts và boxes/index.ts registry + unit tests (25 tests xanh)
 - 2026-10-29 P1.5: render2d/svgView.ts vẽ khuôn SVG vào app.html (27 tests xanh) và hoàn thành toàn bộ Phase P1
 - 2026-10-29 P2.1: ui/app/paramPanel.ts panel tham số và dom.ts helper (27 tests xanh)
+- 2026-10-29 P2.2: core/thickness.ts tính lòng/phủ bì và nối vào luồng dữ liệu (31 tests xanh)

@@ -3,6 +3,7 @@ import { getBoxDef } from '../boxes';
 import { buildDieline } from '../core/dieline';
 import { layoutPanels } from '../core/layout';
 import { createStore } from '../core/store';
+import { calcEffectiveParams } from '../core/thickness';
 import { renderSvgView } from '../render2d/svgView';
 import { initParamPanel, type AppDocState } from '../ui/app/paramPanel';
 
@@ -54,10 +55,12 @@ function initStudio() {
   function updateDielineView(s: AppDocState) {
     const titleEl = document.getElementById('doc-title');
     if (titleEl) {
-      titleEl.textContent = `${boxDef.name} (${s.l}×${s.w}×${s.h} mm)`;
+      const mode = s.sizeType === 'outer' ? 'phủ bì' : 'lòng';
+      titleEl.textContent = `${boxDef.name} (${s.l}×${s.w}×${s.h} mm, ${mode})`;
     }
 
-    const nodes = boxDef.build({ l: s.l, w: s.w, h: s.h, t: s.t, opts: s.opts });
+    const effectiveParams = calcEffectiveParams(s);
+    const nodes = boxDef.build(effectiveParams);
     const layouts = layoutPanels(nodes);
     const dieline = buildDieline(layouts);
 
@@ -68,9 +71,24 @@ function initStudio() {
 
   // Lắng nghe thay đổi kích thước và tham số từ Store
   store.subscribe(
-    (s) => ({ l: s.l, w: s.w, h: s.h, t: s.t, opts: s.opts }),
+    (s) => ({
+      l: s.l,
+      w: s.w,
+      h: s.h,
+      t: s.t,
+      sizeType: s.sizeType,
+      compensate: s.compensate,
+      opts: s.opts,
+    }),
     () => updateDielineView(store.get()),
-    (a, b) => a.l === b.l && a.w === b.w && a.h === b.h && a.t === b.t && JSON.stringify(a.opts) === JSON.stringify(b.opts)
+    (a, b) =>
+      a.l === b.l &&
+      a.w === b.w &&
+      a.h === b.h &&
+      a.t === b.t &&
+      a.sizeType === b.sizeType &&
+      a.compensate === b.compensate &&
+      JSON.stringify(a.opts) === JSON.stringify(b.opts)
   );
 
   // Vẽ lần đầu

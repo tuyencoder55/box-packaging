@@ -18,7 +18,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ layout.ts — cây panel → toạ độ phẳng
 - ✅ dieline.ts — toạ độ phẳng → đường cắt/cấn
 - ⬜ orient.ts — lật/xoay khuôn
-- ⬜ thickness.ts — lòng↔phủ bì, bù độ dày giấy
+- ✅ thickness.ts — lòng↔phủ bì, bù độ dày giấy
 - ⬜ chain.ts — nối đoạn rời thành polyline liền
 
 ## src/boxes (mỗi loại hộp một file)
