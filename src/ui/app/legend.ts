@@ -1,7 +1,11 @@
 // Bảng chú giải dao dứt, dao cấn và đường kích thước khuôn
 import { el } from '../dom';
 
-export function createLegend(): HTMLElement {
+export function createLegend(
+  cutColor = '#3b82f6',
+  creaseColor = '#ef4444',
+  dimColor = '#9da5b4'
+): HTMLElement {
   const itemStyle = {
     display: 'flex',
     alignItems: 'center',
@@ -31,15 +35,15 @@ export function createLegend(): HTMLElement {
       },
     },
     el('div', { style: itemStyle },
-      el('span', { style: `${lineBase} border-top: 2px solid #3b82f6;` }),
+      el('span', { style: `${lineBase} border-top: 2px solid ${cutColor};` }),
       'Dao dứt (Cắt)'
     ),
     el('div', { style: itemStyle },
-      el('span', { style: `${lineBase} border-top: 2px dashed #ef4444;` }),
+      el('span', { style: `${lineBase} border-top: 2px dashed ${creaseColor};` }),
       'Dao cấn (Gấp)'
     ),
     el('div', { style: itemStyle },
-      el('span', { style: `${lineBase} border-top: 1px solid #9da5b4;` }),
+      el('span', { style: `${lineBase} border-top: 1px solid ${dimColor};` }),
       'Kích thước'
     )
   );

@@ -9,6 +9,14 @@ export interface SvgViewData {
   viewBox: string;
 }
 
+export interface SvgStyleOptions {
+  cutColor?: string;
+  creaseColor?: string;
+  dimColor?: string;
+  dimFont?: string;
+  dimFontSize?: number;
+}
+
 /**
  * Ghép danh sách đoạn thẳng thành chuỗi path SVG "M x y L x y ..."
  */
@@ -42,8 +50,15 @@ export function dielineToSvgData(dieline: Dieline, pad = 25): SvgViewData {
 export function renderSvgView(
   container: HTMLElement,
   dieline: Dieline,
-  dimLines: DimensionLine[] = []
+  dimLines: DimensionLine[] = [],
+  styles: SvgStyleOptions = {}
 ): SVGSVGElement {
+  const cutColor = styles.cutColor || '#3b82f6';
+  const creaseColor = styles.creaseColor || '#ef4444';
+  const dimColor = styles.dimColor || '#9da5b4';
+  const dimFont = styles.dimFont || 'Inter, sans-serif';
+  const dimFontSize = styles.dimFontSize || 11;
+
   const { cutPath, creasePath, viewBox } = dielineToSvgData(dieline);
 
   let svg = container.querySelector<SVGSVGElement>('svg.dieline-svg');
@@ -60,7 +75,7 @@ export function renderSvgView(
     const gCrease = document.createElementNS(svgNs, 'g');
     gCrease.setAttribute('id', 'layer-crease');
     const pathCrease = document.createElementNS(svgNs, 'path');
-    pathCrease.setAttribute('stroke', '#ef4444');
+    pathCrease.setAttribute('stroke', creaseColor);
     pathCrease.setAttribute('stroke-width', '1.2');
     pathCrease.setAttribute('stroke-dasharray', '4 3');
     pathCrease.setAttribute('fill', 'none');
@@ -71,7 +86,7 @@ export function renderSvgView(
     const gCut = document.createElementNS(svgNs, 'g');
     gCut.setAttribute('id', 'layer-cut');
     const pathCut = document.createElementNS(svgNs, 'path');
-    pathCut.setAttribute('stroke', '#3b82f6');
+    pathCut.setAttribute('stroke', cutColor);
     pathCut.setAttribute('stroke-width', '1.2');
     pathCut.setAttribute('fill', 'none');
     pathCut.setAttribute('stroke-linecap', 'round');
@@ -90,16 +105,28 @@ export function renderSvgView(
     gContent.appendChild(gDims);
     svg.appendChild(gContent);
     container.appendChild(svg);
-    container.appendChild(createLegend());
+    container.appendChild(createLegend(cutColor, creaseColor, dimColor));
+  } else {
+    // Cập nhật chú giải nếu đã có sẵn
+    const oldLegend = container.querySelector('.dieline-legend');
+    if (oldLegend) {
+      oldLegend.replaceWith(createLegend(cutColor, creaseColor, dimColor));
+    }
   }
 
   svg.setAttribute('viewBox', viewBox);
 
   const cutEl = svg.querySelector<SVGPathElement>('.cut-path');
-  if (cutEl) cutEl.setAttribute('d', cutPath);
+  if (cutEl) {
+    cutEl.setAttribute('d', cutPath);
+    cutEl.setAttribute('stroke', cutColor);
+  }
 
   const creaseEl = svg.querySelector<SVGPathElement>('.crease-path');
-  if (creaseEl) creaseEl.setAttribute('d', creasePath);
+  if (creaseEl) {
+    creaseEl.setAttribute('d', creasePath);
+    creaseEl.setAttribute('stroke', creaseColor);
+  }
 
   // Cập nhật các đường kích thước
   const dimsLayer = svg.querySelector<SVGGElement>('.dims-layer');
@@ -112,15 +139,21 @@ export function renderSvgView(
       line.setAttribute('y1', String(d.start[1]));
       line.setAttribute('x2', String(d.end[0]));
       line.setAttribute('y2', String(d.end[1]));
-      line.setAttribute('stroke', '#9da5b4');
+      line.setAttribute('stroke', dimColor);
       line.setAttribute('stroke-width', '0.8');
 
       const text = document.createElementNS(svgNs, 'text');
       text.setAttribute('x', String(d.mid[0]));
       text.setAttribute('y', String(d.mid[1]));
-      text.setAttribute('fill', '#9da5b4');
-      text.setAttribute('font-size', '10');
+      text.setAttribute('fill', dimColor);
+      text.setAttribute('font-family', dimFont);
+      text.setAttribute('font-size', String(dimFontSize));
       text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('paint-order', 'stroke');
+      text.setAttribute('stroke', '#181b22');
+      text.setAttribute('stroke-width', '3px');
+      text.setAttribute('stroke-linejoin', 'round');
+      text.setAttribute('font-weight', '600');
       text.textContent = d.label;
 
       dimsLayer.appendChild(line);
@@ -130,4 +163,3 @@ export function renderSvgView(
 
   return svg;
 }
-

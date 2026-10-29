@@ -16,6 +16,11 @@ export interface AppDocState {
   compensate: boolean;
   opts: Record<string, string | boolean | number>;
   orient: 'normal' | 'flipH' | 'flipV' | 'rot180';
+  dimFont?: string;
+  dimFontSize?: number;
+  dimColor?: string;
+  cutColor?: string;
+  creaseColor?: string;
 }
 
 function createCard(titleText?: string): HTMLElement {
@@ -371,4 +376,114 @@ export function initParamPanel(
     }
     container.appendChild(cardOpts);
   }
+
+  // CARD 6: Tùy chỉnh hiển thị (Dao bế & Kích thước Dim)
+  const cardStyle = createCard('Tùy chỉnh hiển thị & Kích thước (Dim)');
+
+  // 1. Font chữ Dim (10 font phổ biến)
+  const fontWrap = el('div', { style: 'display: flex; flex-direction: column; gap: 5px;' });
+  const fontLbl = el('span', { text: 'Font chữ kích thước (Dim)', style: 'font-size: 12px; color: var(--text-muted);' });
+  const currentFont = state.dimFont || 'Inter, sans-serif';
+  const fontSelect = el(
+    'select',
+    {
+      style: inputStyle,
+      onChange: (e: Event) => {
+        const val = (e.target as HTMLSelectElement).value;
+        store.set({ dimFont: val });
+      },
+    },
+    el('option', { value: 'Inter, sans-serif', selected: currentFont.includes('Inter') }, '1. Inter (Chuẩn web)'),
+    el('option', { value: 'Roboto, sans-serif', selected: currentFont.includes('Roboto') }, '2. Roboto (Google)'),
+    el('option', { value: 'Arial, sans-serif', selected: currentFont.includes('Arial') }, '3. Arial (Phổ thông)'),
+    el('option', { value: 'Montserrat, sans-serif', selected: currentFont.includes('Montserrat') }, '4. Montserrat (Hình học)'),
+    el('option', { value: "'Open Sans', sans-serif", selected: currentFont.includes('Open Sans') }, '5. Open Sans (Dễ đọc)'),
+    el('option', { value: "'Segoe UI', sans-serif", selected: currentFont.includes('Segoe UI') }, '6. Segoe UI (Windows)'),
+    el('option', { value: 'Tahoma, sans-serif', selected: currentFont.includes('Tahoma') }, '7. Tahoma (Kỹ thuật)'),
+    el('option', { value: 'Helvetica, sans-serif', selected: currentFont.includes('Helvetica') }, '8. Helvetica (Đồ họa)'),
+    el('option', { value: "'Courier New', monospace", selected: currentFont.includes('Courier') }, '9. Courier New (CAD / Bản vẽ)'),
+    el('option', { value: "'Times New Roman', serif", selected: currentFont.includes('Times') }, '10. Times New Roman (Cổ điển)')
+  );
+  fontWrap.appendChild(fontLbl);
+  fontWrap.appendChild(fontSelect);
+  cardStyle.appendChild(fontWrap);
+
+  // 2. Cỡ chữ Dim
+  const sizeWrap = el('div', { style: 'display: flex; flex-direction: column; gap: 5px;' });
+  const sizeLbl = el('span', { text: 'Cỡ chữ kích thước (Dim)', style: 'font-size: 12px; color: var(--text-muted);' });
+  const currentSize = state.dimFontSize || 11;
+  const sizeSelect = el(
+    'select',
+    {
+      style: inputStyle,
+      onChange: (e: Event) => {
+        const val = parseInt((e.target as HTMLSelectElement).value, 10);
+        store.set({ dimFontSize: val });
+      },
+    },
+    el('option', { value: '10', selected: currentSize === 10 }, '10 px (Nhỏ)'),
+    el('option', { value: '11', selected: currentSize === 11 }, '11 px (Tiêu chuẩn)'),
+    el('option', { value: '12', selected: currentSize === 12 }, '12 px (Vừa)'),
+    el('option', { value: '14', selected: currentSize === 14 }, '14 px (Lớn)'),
+    el('option', { value: '16', selected: currentSize === 16 }, '16 px (Rất lớn)')
+  );
+  sizeWrap.appendChild(sizeLbl);
+  sizeWrap.appendChild(sizeSelect);
+  cardStyle.appendChild(sizeWrap);
+
+  // 3. Màu sắc: Dao cắt, Dao cấn, Đường Dim
+  function createColorRow(
+    title: string,
+    initialHex: string,
+    onColorChange: (val: string) => void
+  ): HTMLElement {
+    const row = el('div', {
+      style: 'display: flex; align-items: center; justify-content: space-between; gap: 8px;',
+    });
+    const lbl = el('span', { text: title, style: 'font-size: 12px; color: var(--text-muted);' });
+
+    const ctrlWrap = el('div', { style: 'display: flex; align-items: center; gap: 6px;' });
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = initialHex;
+    colorInput.style.cssText = `
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+    `;
+
+    const hexText = el('span', {
+      text: initialHex.toUpperCase(),
+      style: 'font-size: 11px; font-family: monospace; color: var(--text-main); min-width: 58px;',
+    });
+
+    colorInput.addEventListener('input', () => {
+      hexText.textContent = colorInput.value.toUpperCase();
+      onColorChange(colorInput.value);
+    });
+
+    ctrlWrap.appendChild(colorInput);
+    ctrlWrap.appendChild(hexText);
+    row.appendChild(lbl);
+    row.appendChild(ctrlWrap);
+    return row;
+  }
+
+  const colorsBox = el('div', { style: 'display: flex; flex-direction: column; gap: 10px;' });
+  colorsBox.appendChild(
+    createColorRow('Màu dao dứt (Cắt)', state.cutColor || '#3b82f6', (hex) => store.set({ cutColor: hex }))
+  );
+  colorsBox.appendChild(
+    createColorRow('Màu dao cấn (Gấp)', state.creaseColor || '#ef4444', (hex) => store.set({ creaseColor: hex }))
+  );
+  colorsBox.appendChild(
+    createColorRow('Màu đường đo (Dim)', state.dimColor || '#9da5b4', (hex) => store.set({ dimColor: hex }))
+  );
+  cardStyle.appendChild(colorsBox);
+
+  container.appendChild(cardStyle);
 }
