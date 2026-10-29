@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P2 (xong P2.4, chuẩn bị P2.5)
+Đang ở: P2 (xong P2.5, chuẩn bị P2.6)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -20,7 +20,7 @@
   - [x] P2.2 core/thickness.ts + nối vào luồng dữ liệu
   - [x] P2.3 render2d/dimensions.ts + ui/app/legend.ts
   - [x] P2.4 render2d/zoomPan.ts + thanh zoom %
-  - [ ] P2.5 core/orient.ts + nút Chuẩn/Lật/Xoay
+  - [x] P2.5 core/orient.ts + nút Chuẩn/Lật/Xoay
   - [ ] P2.6 Lưu localStorage + trạng thái "Đã lưu", stepBar.ts
 - [ ] P3 Thêm hộp + Thư viện mẫu
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
@@ -53,3 +53,4 @@
 - 2026-10-29 P2.2: core/thickness.ts tính lòng/phủ bì và nối vào luồng dữ liệu (31 tests xanh)
 - 2026-10-29 P2.3: render2d/dimensions.ts và ui/app/legend.ts (31 tests xanh)
 - 2026-10-29 P2.4: render2d/zoomPan.ts zoom cuộn chuột, pan kéo và thanh zoom % (31 tests xanh)
+- 2026-10-29 P2.5: core/orient.ts lật/xoay khuôn và bộ chọn hướng hiển thị (36 tests xanh)

@@ -1,6 +1,7 @@
 // Panel tham số bên trái: sinh tự động từ BoxDef, bắt lỗi nhập liệu và cập nhật Store
 import type { BoxDef } from '../../core/types';
 import type { Store } from '../../core/store';
+import type { Orient } from '../../core/orient';
 import { mmToUnit, unitToMm, type Unit } from '../../core/units';
 import { el } from '../dom';
 
@@ -178,6 +179,28 @@ export function initParamPanel(
     }
   }
 
+  // 6. Hướng hiển thị
+  const orientSelect = el(
+    'select',
+    {
+      style: {
+        background: 'var(--bg-input)',
+        color: 'var(--text-main)',
+        border: '1px solid var(--border-subtle)',
+        padding: '6px 10px',
+        borderRadius: 'var(--radius-sm)',
+      },
+      onChange: (e: Event) => {
+        const val = (e.target as HTMLSelectElement).value as Orient;
+        store.set({ orient: val });
+      },
+    },
+    el('option', { value: 'normal', selected: state.orient === 'normal' }, 'Chuẩn'),
+    el('option', { value: 'flipH', selected: state.orient === 'flipH' }, 'Lật ngang'),
+    el('option', { value: 'flipV', selected: state.orient === 'flipV' }, 'Lật dọc'),
+    el('option', { value: 'rot180', selected: state.orient === 'rot180' }, 'Xoay 180°')
+  );
+
   // Lắp ráp toàn bộ panel
   container.append(
     el('h3', { style: { fontSize: 'var(--font-size-base)', margin: '0 0 4px 0' } }, 'Thông số kích thước'),
@@ -196,6 +219,10 @@ export function initParamPanel(
     el('label', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
       el('span', { style: { fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' } }, 'Độ dày giấy (mm)'),
       inputThickness
+    ),
+    el('label', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
+      el('span', { style: { fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' } }, 'Hướng hiển thị'),
+      orientSelect
     ),
     ...optElements
   );

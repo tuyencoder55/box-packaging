@@ -2,6 +2,7 @@ import '../styles/base.css';
 import { getBoxDef } from '../boxes';
 import { buildDieline } from '../core/dieline';
 import { layoutPanels } from '../core/layout';
+import { transformDieline } from '../core/orient';
 import { createStore } from '../core/store';
 import { calcEffectiveParams } from '../core/thickness';
 import { buildDimensionLines } from '../render2d/dimensions';
@@ -67,10 +68,11 @@ function initStudio() {
     const nodes = boxDef.build(effectiveParams);
     const layouts = layoutPanels(nodes);
     const dieline = buildDieline(layouts);
+    const orientedDieline = transformDieline(dieline, s.orient);
     const dimLines = buildDimensionLines(boxDef.dims, layouts, { l: s.l, w: s.w, h: s.h }, s.unit);
 
     if (viewport) {
-      const svg = renderSvgView(viewport, dieline, dimLines);
+      const svg = renderSvgView(viewport, orientedDieline, dimLines);
       if (!zoomController) {
         zoomController = setupZoomPan(viewport, svg);
       }
@@ -86,6 +88,7 @@ function initStudio() {
       t: s.t,
       sizeType: s.sizeType,
       compensate: s.compensate,
+      orient: s.orient,
       opts: s.opts,
     }),
     () => updateDielineView(store.get()),
@@ -96,6 +99,7 @@ function initStudio() {
       a.t === b.t &&
       a.sizeType === b.sizeType &&
       a.compensate === b.compensate &&
+      a.orient === b.orient &&
       JSON.stringify(a.opts) === JSON.stringify(b.opts)
   );
 
