@@ -16,14 +16,13 @@ export const fefco0301: BoxDef = {
   options: [
     {
       key: 'part',
-      label: 'Chi tiết hiển thị',
+      label: 'Chi tiết khuôn',
       type: 'select',
       choices: [
-        { value: 'both', label: 'Cả nắp và đáy (Bộ đầy đủ)' },
-        { value: 'base', label: 'Chỉ khay đáy (Âm)' },
-        { value: 'lid', label: 'Chỉ khay nắp (Dương)' },
+        { value: 'base', label: '1. Khay đáy (Phần Âm)' },
+        { value: 'lid', label: '2. Khay nắp (Phần Dương)' },
       ],
-      default: 'both',
+      default: 'base',
     },
     {
       key: 'lidHeight',
@@ -43,180 +42,143 @@ export const fefco0301: BoxDef = {
     },
   ],
   dims: [
-    { panelId: 'base-face', axis: 'u', param: 'l' },
-    { panelId: 'base-face', axis: 'v', param: 'w' },
-    { panelId: 'base-wall-top', axis: 'v', param: 'h' },
+    { panelId: 'tray-face', axis: 'u', param: 'l' },
+    { panelId: 'tray-face', axis: 'v', param: 'w' },
+    { panelId: 'tray-wall-top', axis: 'v', param: 'h' },
   ],
 
   build(p: BoxParams): PanelNode[] {
     const { l, w, h, t } = p;
-    const part = String(p.opts?.part ?? 'both');
+    const part = String(p.opts?.part ?? 'base');
     const hLid = Number(p.opts?.lidHeight ?? 40);
     const clearance = Number(p.opts?.clearance ?? 2);
-    const glueDepth = Math.max(15, Math.min(25, h * 0.4));
-    const glueLidDepth = Math.max(15, Math.min(25, hLid * 0.4));
 
-    // Kích thước nắp (phủ ngoài đáy + 2t + độ hở)
-    const lLid = l + 2 * t + clearance;
-    const wLid = w + 2 * t + clearance;
+    // Xác định kích thước theo chi tiết đang chọn: Khay Đáy hay Khay Nắp
+    const isLid = part === 'lid';
+    const trayL = isLid ? l + 2 * t + clearance : l;
+    const trayW = isLid ? w + 2 * t + clearance : w;
+    const trayH = isLid ? hLid : h;
+    const trayLabel = isLid ? 'Nắp' : 'Đáy';
+
+    // Độ rộng tai dán góc (khoảng 35-50% chiều cao thành, tối đa 30mm)
+    const gDepth = Math.max(15, Math.min(30, trayH * 0.45));
 
     const nodes: PanelNode[] = [];
 
-    // HÀM TẠO 1 KHAY (Đáy hoặc Nắp)
-    function createTray(
-      prefix: string,
-      length: number,
-      width: number,
-      height: number,
-      gDepth: number,
-      parentId: string | null,
-      attachEdge?: 'top' | 'right' | 'bottom' | 'left',
-      trayLabel = 'Khay'
-    ) {
-      // Mặt chính của khay
-      nodes.push({
-        id: `${prefix}-face`,
-        parent: parentId,
-        edge: attachEdge,
-        len: length,
-        depth: width,
-        fold: 0,
-        step: 0,
-        label: `${trayLabel} chính`,
-      });
+    // 1. Mặt chính của khay (Panel gốc đặt tại 0, 0)
+    nodes.push({
+      id: 'tray-face',
+      parent: null,
+      len: trayL,
+      depth: trayW,
+      fold: 0,
+      step: 0,
+      label: `Mặt ${trayLabel}`,
+    });
 
-      // Thành trên
-      nodes.push({
-        id: `${prefix}-wall-top`,
-        parent: `${prefix}-face`,
-        edge: 'top',
-        len: length,
-        depth: height,
-        fold: 90,
-        step: 1,
-        label: `${trayLabel} - Thành trên`,
-      });
+    // 2. Thành trên (gắn cạnh top của mặt chính)
+    nodes.push({
+      id: 'tray-wall-top',
+      parent: 'tray-face',
+      edge: 'top',
+      len: trayL,
+      depth: trayH,
+      fold: 90,
+      step: 1,
+      label: `Thành trên (${trayLabel})`,
+    });
 
-      // Tai dán góc trái trên
-      nodes.push({
-        id: `${prefix}-glue-tl`,
-        parent: `${prefix}-wall-top`,
-        edge: 'left',
-        len: height,
-        depth: gDepth,
-        shape: chamfer(height, gDepth, 4, 4),
-        fold: 90,
-        step: 2,
-        label: `${trayLabel} - Tai dán TL`,
-        glue: true,
-      });
+    // Tai dán góc trên-trái (gắn cạnh left của thành trên)
+    nodes.push({
+      id: 'tray-glue-tl',
+      parent: 'tray-wall-top',
+      edge: 'left',
+      len: trayH,
+      depth: gDepth,
+      shape: chamfer(trayH, gDepth, 5, 5),
+      fold: 90,
+      step: 2,
+      label: 'Tai dán TL',
+      glue: true,
+    });
 
-      // Tai dán góc phải trên
-      nodes.push({
-        id: `${prefix}-glue-tr`,
-        parent: `${prefix}-wall-top`,
-        edge: 'right',
-        len: height,
-        depth: gDepth,
-        shape: chamfer(height, gDepth, 4, 4),
-        fold: 90,
-        step: 2,
-        label: `${trayLabel} - Tai dán TR`,
-        glue: true,
-      });
+    // Tai dán góc trên-phải (gắn cạnh right của thành trên)
+    nodes.push({
+      id: 'tray-glue-tr',
+      parent: 'tray-wall-top',
+      edge: 'right',
+      len: trayH,
+      depth: gDepth,
+      shape: chamfer(trayH, gDepth, 5, 5),
+      fold: 90,
+      step: 2,
+      label: 'Tai dán TR',
+      glue: true,
+    });
 
-      // Thành dưới
-      nodes.push({
-        id: `${prefix}-wall-bottom`,
-        parent: `${prefix}-face`,
-        edge: 'bottom',
-        len: length,
-        depth: height,
-        fold: 90,
-        step: 1,
-        label: `${trayLabel} - Thành dưới`,
-      });
+    // 3. Thành dưới (gắn cạnh bottom của mặt chính)
+    nodes.push({
+      id: 'tray-wall-bottom',
+      parent: 'tray-face',
+      edge: 'bottom',
+      len: trayL,
+      depth: trayH,
+      fold: 90,
+      step: 1,
+      label: `Thành dưới (${trayLabel})`,
+    });
 
-      // Tai dán góc trái dưới
-      nodes.push({
-        id: `${prefix}-glue-bl`,
-        parent: `${prefix}-wall-bottom`,
-        edge: 'left',
-        len: height,
-        depth: gDepth,
-        shape: chamfer(height, gDepth, 4, 4),
-        fold: 90,
-        step: 2,
-        label: `${trayLabel} - Tai dán BL`,
-        glue: true,
-      });
+    // Tai dán góc dưới-trái (gắn cạnh left của thành dưới)
+    nodes.push({
+      id: 'tray-glue-bl',
+      parent: 'tray-wall-bottom',
+      edge: 'left',
+      len: trayH,
+      depth: gDepth,
+      shape: chamfer(trayH, gDepth, 5, 5),
+      fold: 90,
+      step: 2,
+      label: 'Tai dán BL',
+      glue: true,
+    });
 
-      // Tai dán góc phải dưới
-      nodes.push({
-        id: `${prefix}-glue-br`,
-        parent: `${prefix}-wall-bottom`,
-        edge: 'right',
-        len: height,
-        depth: gDepth,
-        shape: chamfer(height, gDepth, 4, 4),
-        fold: 90,
-        step: 2,
-        label: `${trayLabel} - Tai dán BR`,
-        glue: true,
-      });
+    // Tai dán góc dưới-phải (gắn cạnh right của thành dưới)
+    nodes.push({
+      id: 'tray-glue-br',
+      parent: 'tray-wall-bottom',
+      edge: 'right',
+      len: trayH,
+      depth: gDepth,
+      shape: chamfer(trayH, gDepth, 5, 5),
+      fold: 90,
+      step: 2,
+      label: 'Tai dán BR',
+      glue: true,
+    });
 
-      // Thành trái
-      nodes.push({
-        id: `${prefix}-wall-left`,
-        parent: `${prefix}-face`,
-        edge: 'left',
-        len: width,
-        depth: height,
-        fold: 90,
-        step: 1,
-        label: `${trayLabel} - Thành trái`,
-      });
+    // 4. Thành trái (gắn cạnh left của mặt chính)
+    nodes.push({
+      id: 'tray-wall-left',
+      parent: 'tray-face',
+      edge: 'left',
+      len: trayW,
+      depth: trayH,
+      fold: 90,
+      step: 1,
+      label: `Thành trái (${trayLabel})`,
+    });
 
-      // Thành phải
-      nodes.push({
-        id: `${prefix}-wall-right`,
-        parent: `${prefix}-face`,
-        edge: 'right',
-        len: width,
-        depth: height,
-        fold: 90,
-        step: 1,
-        label: `${trayLabel} - Thành phải`,
-      });
-    }
-
-    if (part === 'base') {
-      // Chỉ khay đáy
-      createTray('base', l, w, h, glueDepth, null, undefined, 'Đáy');
-    } else if (part === 'lid') {
-      // Chỉ khay nắp
-      createTray('base', lLid, wLid, hLid, glueLidDepth, null, undefined, 'Nắp');
-    } else {
-      // Cả nắp và đáy trên cùng 1 bản vẽ khuôn bế
-      // Khay Đáy trước
-      createTray('base', l, w, h, glueDepth, null, undefined, 'Đáy');
-
-      // Khoảng đệm phân cách giữa 2 khay trên tờ khuôn (bridge)
-      const gap = h + hLid + 20; // Đủ khoảng cách để 2 khay không chạm nhau
-      nodes.push({
-        id: 'separator-bridge',
-        parent: 'base-wall-right',
-        edge: 'right',
-        len: w,
-        depth: gap,
-        fold: 0,
-        step: 0,
-        label: 'Đường phân cách',
-      });
-
-      // Khay Nắp nối tiếp sau cầu phân cách
-      createTray('lid', lLid, wLid, hLid, glueLidDepth, 'separator-bridge', 'right', 'Nắp');
-    }
+    // 5. Thành phải (gắn cạnh right của mặt chính)
+    nodes.push({
+      id: 'tray-wall-right',
+      parent: 'tray-face',
+      edge: 'right',
+      len: trayW,
+      depth: trayH,
+      fold: 90,
+      step: 1,
+      label: `Thành phải (${trayLabel})`,
+    });
 
     return nodes;
   },

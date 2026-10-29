@@ -5,7 +5,7 @@ import { layoutPanels } from '../core/layout';
 import { fefco0301 } from './fefco-0301';
 
 describe('fefco-0301', () => {
-  it('sinh đúng 9 panel khi chọn chỉ khay đáy (base)', () => {
+  it('sinh đúng cấu trúc khay đáy gồm 9 panel và 8 đường cấn', () => {
     const nodes = fefco0301.build({
       l: 250,
       w: 180,
@@ -14,55 +14,61 @@ describe('fefco-0301', () => {
       opts: { part: 'base' },
     });
 
-    // 1 mặt đáy + 4 thành + 4 tai dán = 9 panels
+    // 1 mặt đáy + 4 thành + 4 tai dán góc = 9 panels
     expect(nodes).toHaveLength(9);
 
     const layouts = layoutPanels(nodes);
     expect(layouts).toHaveLength(9);
 
     const dieline = buildDieline(layouts);
-    // 9 panels -> 1 gốc + 8 con -> 8 đường cấn
+    // 9 panels -> 1 gốc + 8 con -> đúng 8 đường cấn
     expect(dieline.crease).toHaveLength(8);
   });
 
-  it('sinh đầy đủ 19 panel khi chọn cả nắp và đáy (both)', () => {
+  it('hộp bao bbox khay đáy khớp chuẩn xác với hình chữ thập (L + 2H) × (W + 2H)', () => {
+    // Với L=250, W=180, H=80:
+    // Thành trái cao 80 (-80 đến 0), mặt đáy 250 (0 đến 250), thành phải cao 80 (250 đến 330)
+    // -> minX = -80, width = 250 + 160 = 410 mm
+    // Thành trên cao 80 (-80 đến 0), mặt đáy 180 (0 đến 180), thành dưới cao 80 (180 đến 260)
+    // -> minY = -80, height = 180 + 160 = 340 mm
     const nodes = fefco0301.build({
       l: 250,
       w: 180,
       h: 80,
       t: 2,
-      opts: { part: 'both', lidHeight: 40, clearance: 2 },
+      opts: { part: 'base' },
     });
 
-    // 9 (đáy) + 1 (bridge) + 9 (nắp) = 19 panels
-    expect(nodes).toHaveLength(19);
-
     const layouts = layoutPanels(nodes);
-    expect(layouts).toHaveLength(19);
-
     const dieline = buildDieline(layouts);
-    expect(dieline.crease.length).toBeGreaterThanOrEqual(16);
+
+    expect(dieline.bbox).toEqual([-80, -80, 410, 340]);
   });
 
-  it('kích thước nắp tự động tính bù độ dày giấy và độ hở lồng', () => {
+  it('khay nắp tự động tính kích thước phủ bì nhỉnh hơn đáy theo độ hở và độ dày giấy', () => {
     const l = 200;
     const w = 150;
+    const h = 70;
     const t = 2;
     const clearance = 2;
+    const lidHeight = 35;
 
     const nodes = fefco0301.build({
       l,
       w,
-      h: 60,
+      h,
       t,
-      opts: { part: 'both', clearance },
+      opts: { part: 'lid', clearance, lidHeight },
     });
 
-    const lidFace = nodes.find((n) => n.id === 'lid-face');
-    expect(lidFace).toBeDefined();
+    const face = nodes.find((n) => n.id === 'tray-face');
+    const wallTop = nodes.find((n) => n.id === 'tray-wall-top');
+
     // lLid = l + 2*t + clearance = 200 + 4 + 2 = 206
-    expect(lidFace?.len).toBe(206);
+    expect(face?.len).toBe(206);
     // wLid = w + 2*t + clearance = 150 + 4 + 2 = 156
-    expect(lidFace?.depth).toBe(156);
+    expect(face?.depth).toBe(156);
+    // hLid = 35
+    expect(wallTop?.depth).toBe(35);
   });
 });
