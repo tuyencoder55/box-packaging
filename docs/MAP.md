@@ -52,7 +52,8 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ app/legend.ts — bảng chú giải dao cắt/cấn
 - ✅ app/stepBar.ts — thanh chuyển 3 bước Dieline/3D/Xuất
 - ⬜ app/mockupCard.ts · exportModal.ts
-- ⬜ templates/cardGrid.ts · filterBar.ts · detailModal.ts
+- ✅ templates/cardGrid.ts · filterBar.ts
+- ⬜ templates/detailModal.ts
 
 ## src/pages
 - ✅ home.ts · templates.ts · app.ts — chỉ ghép module, không chứa logic

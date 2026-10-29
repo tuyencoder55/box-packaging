@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P3 (xong P3.4, chuẩn bị P3.5)
+Đang ở: P3 (xong P3.5, chuẩn bị P3.6)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -27,7 +27,7 @@
   - [x] P3.2 boxes/tuck-end-straight.ts + test
   - [x] P3.3 boxes/tuck-end-reverse.ts + test
   - [x] P3.4 boxes/auto-lock-bottom.ts + test
-  - [ ] P3.5 ui/templates/* + pages/templates.ts (lưới thẻ, lọc nhóm)
+  - [x] P3.5 ui/templates/* + pages/templates.ts (lưới thẻ, lọc nhóm)
   - [ ] P3.6 Nút "Dùng mẫu này" + bộ chọn loại hộp trong Studio
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
 - [ ] P4 Mockup 3D
@@ -65,3 +65,4 @@
 - 2026-10-29 P3.2: boxes/tuck-end-straight.ts (hộp nắp gài thẳng STE) và unit tests (40 tests xanh)
 - 2026-10-29 P3.3: boxes/tuck-end-reverse.ts (hộp nắp gài ngược RTE) và unit tests (43 tests xanh)
 - 2026-10-29 P3.4: boxes/auto-lock-bottom.ts (hộp đáy khoá tự động ALB) và unit tests (46 tests xanh)
+- 2026-10-29 P3.5: ui/templates/filterBar.ts + cardGrid.ts + pages/templates.ts (lưới thẻ, thumbnail vector, lọc nhóm)
