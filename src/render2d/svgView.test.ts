@@ -28,3 +28,4 @@ describe('svgView', () => {
     expect(data.creasePath).toBe('M 0 25 L 100 25');
   });
 });
+

@@ -19,3 +19,4 @@ export function getBoxDef(id: string): BoxDef | undefined {
 export function getAllBoxes(): BoxDef[] {
   return Object.values(BOX_REGISTRY);
 }
+

@@ -86,3 +86,4 @@ export function renderSvgView(container: HTMLElement, dieline: Dieline): SVGSVGE
 
   return svg;
 }
+

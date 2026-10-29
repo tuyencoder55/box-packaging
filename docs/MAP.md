@@ -47,7 +47,9 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ⬜ dxf.ts · svg.ts · png.ts · download.ts — mỗi định dạng một file
 
 ## src/ui
-- ⬜ app/paramPanel.ts · stepBar.ts · legend.ts · mockupCard.ts · exportModal.ts
+- ✅ dom.ts — helper tạo DOM el()
+- ✅ app/paramPanel.ts — panel tham số bên trái
+- ⬜ app/stepBar.ts · legend.ts · mockupCard.ts · exportModal.ts
 - ⬜ templates/cardGrid.ts · filterBar.ts · detailModal.ts
 
 ## src/pages
