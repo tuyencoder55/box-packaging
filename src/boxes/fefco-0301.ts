@@ -46,6 +46,9 @@ export const fefco0301: BoxDef = {
     { panelId: 'tray-base-face', axis: 'u', param: 'l' },
     { panelId: 'tray-base-face', axis: 'v', param: 'w' },
     { panelId: 'tray-base-wall-top', axis: 'v', param: 'h' },
+    { panelId: 'tray-lid-face', axis: 'u', param: 'l' },
+    { panelId: 'tray-lid-face', axis: 'v', param: 'w' },
+    { panelId: 'tray-lid-wall-top', axis: 'v', param: 'h' },
   ],
 
   build(p: BoxParams): PanelNode[] {
@@ -243,27 +246,14 @@ export const fefco0301: BoxDef = {
       createSlottedTray('base', l, w, h, 'horizontal', null, undefined, 'Đáy');
     } else if (part === 'lid') {
       // Chỉ Thùng Nắp
-      createSlottedTray('base', lLid, wLid, hLid, 'vertical', null, undefined, 'Nắp');
+      createSlottedTray('lid', lLid, wLid, hLid, 'vertical', null, undefined, 'Nắp');
     } else {
       // Cả Bộ Nắp & Đáy: Thùng Nắp ở trên, Thùng Đáy ở dưới (Chuẩn bản vẽ xưởng)
-      // Thùng Nắp (NAP) ở trên
+      // 1. Thùng Nắp (NAP) ở trên
       createSlottedTray('lid', lLid, wLid, hLid, 'vertical', null, undefined, 'NẮP');
 
-      // Khoảng đệm phân cách cắt rời giữa 2 phôi
-      const gapDist = 30; // Khoảng cách 30mm giữa 2 tấm
-      nodes.push({
-        id: 'tray-separator-bridge',
-        parent: 'tray-lid-wall-bottom',
-        edge: 'bottom',
-        len: lLid,
-        depth: gapDist,
-        fold: 0,
-        step: 0,
-        label: 'Khoảng phân cách',
-      });
-
-      // Thùng Đáy (DAY) ở dưới, thẳng hàng và song song với Thùng Nắp
-      createSlottedTray('base', l, w, h, 'horizontal', 'tray-separator-bridge', 'bottom', 'ĐÁY');
+      // 2. Thùng Đáy (DAY) ở dưới (Tấm phôi rời độc lập, layoutPanels tự động xếp thẳng hàng phía dưới)
+      createSlottedTray('base', l, w, h, 'horizontal', null, undefined, 'ĐÁY');
     }
 
     return nodes;

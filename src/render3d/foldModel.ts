@@ -163,8 +163,9 @@ export function buildFoldModel(panels: LayoutPanel[]): FoldModelResult {
 
     if (!p.node.parent) {
       // Panel gốc: gắn trực tiếp vào rootGroup
-      // Chuyển tọa độ tương đối vào giữa Scene
-      group.position.set(0, 0, 0);
+      // Đặt toạ độ theo điểm gốc ban đầu (hỗ trợ mô hình có nhiều panel gốc độc lập như bộ Nắp & Đáy)
+      const origin = hingeOrigins.get(p.node.id) ?? [0, 0];
+      group.position.set(origin[0], -origin[1], 0);
       rootGroup.add(group);
     } else {
       // Panel con: gắn vào group của cha

@@ -28,7 +28,7 @@ describe('fefco-0301', () => {
     expect(dieline.bbox[3]).toBe(775);
   });
 
-  it('sinh đầy đủ 19 panel khi chọn cả bộ nắp và đáy', () => {
+  it('sinh đầy đủ 18 panel khi chọn cả bộ nắp và đáy (2 tấm phôi độc lập)', () => {
     const nodes = fefco0301.build({
       l: 400,
       w: 300,
@@ -37,11 +37,15 @@ describe('fefco-0301', () => {
       opts: { part: 'both' },
     });
 
-    // 9 (nắp) + 1 (cầu phân cách) + 9 (đáy) = 19 panels
-    expect(nodes).toHaveLength(19);
+    // 9 (nắp) + 9 (đáy) = 18 panels (không dùng panel cầu giả)
+    expect(nodes).toHaveLength(18);
 
     const layouts = layoutPanels(nodes);
-    expect(layouts).toHaveLength(19);
+    expect(layouts).toHaveLength(18);
+
+    const dieline = buildDieline(layouts);
+    // 2 tấm phôi rời nhau nên không có đường nối dính
+    expect(dieline.cut.length).toBeGreaterThan(0);
   });
 
   it('thùng nắp tự động tính kích thước phủ bì nhỉnh hơn thùng đáy để trùm khít', () => {
@@ -58,7 +62,7 @@ describe('fefco-0301', () => {
       opts: { part: 'lid' },
     });
 
-    const face = nodes.find((n) => n.id === 'tray-base-face');
+    const face = nodes.find((n) => n.id === 'tray-lid-face');
     expect(face).toBeDefined();
     // Nắp dài hơn và rộng hơn đáy
     expect(face!.len).toBeGreaterThan(l);

@@ -65,5 +65,33 @@ describe('layout', () => {
     expect(grandchild.rect).toEqual([0, 90, 100, 20]);
     expect(grandchild.baseSeg).toEqual({ a: [0, 90], b: [100, 90] });
   });
+
+  it('hỗ trợ nhiều panel gốc độc lập (bộ nắp & đáy rời) xếp thẳng hàng có khoảng đệm', () => {
+    const nodes: PanelNode[] = [
+      { id: 'root-lid', parent: null, len: 200, depth: 100, fold: 0, step: 0 },
+      { id: 'lid-top', parent: 'root-lid', edge: 'top', len: 200, depth: 50, fold: 90, step: 1 },
+      { id: 'root-base', parent: null, len: 180, depth: 90, fold: 0, step: 0 },
+      { id: 'base-top', parent: 'root-base', edge: 'top', len: 180, depth: 50, fold: 90, step: 1 },
+    ];
+
+    const layouts = layoutPanels(nodes);
+    expect(layouts).toHaveLength(4);
+
+    const lidTop = layouts.find((l) => l.node.id === 'lid-top')!;
+    const rootLid = layouts.find((l) => l.node.id === 'root-lid')!;
+    const baseTop = layouts.find((l) => l.node.id === 'base-top')!;
+    const rootBase = layouts.find((l) => l.node.id === 'root-base')!;
+
+    // Nắp ở trên
+    expect(lidTop.rect[1]).toBe(-50);
+    expect(rootLid.rect[1]).toBe(0);
+    const lidMaxY = rootLid.rect[1] + rootLid.rect[3]; // 0 + 100 = 100
+    expect(lidMaxY).toBe(100);
+
+    // Đáy ở dưới với khoảng đệm 40mm
+    // Tấm đáy vươn lên trên 50mm (baseTop), nên baseTop.minY = lidMaxY + 40 = 140
+    expect(baseTop.rect[1]).toBe(140);
+    expect(rootBase.rect[1]).toBe(190);
+  });
 });
 
