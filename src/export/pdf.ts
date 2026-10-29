@@ -1,6 +1,7 @@
-// Xuất file PDF chuẩn in ấn: 2 Layer OCG (CUT, CREASE), màu pha Separation CMYK, Overprint
+// Xuất file PDF chuẩn in ấn: 3 Layer OCG (CUT, CREASE, DIMENSION), màu pha Separation CMYK, Overprint
 import { chainSegments, type Polyline } from '../core/chain';
 import type { Dieline } from '../core/types';
+import type { DimensionLine } from '../render2d/dimensions';
 import { PdfWriter } from './pdfWriter';
 
 const MM_TO_PT = 72 / 25.4;
@@ -34,9 +35,13 @@ function polylineToPdfOps(line: Polyline, originX: number, originY: number, tota
 }
 
 /**
- * Sinh file PDF hoàn chỉnh chuẩn nhà in
+ * Sinh file PDF hoàn chỉnh chuẩn nhà in kèm các đường kích thước (DIMENSION)
  */
-export function generatePdfContent(dieline: Dieline, margin: number = 5): string {
+export function generatePdfContent(
+  dieline: Dieline,
+  margin: number = 5,
+  dimLines: DimensionLine[] = []
+): string {
   const [minX, minY, width, height] = dieline.bbox;
   const originX = minX - margin;
   const originY = minY - margin;
@@ -81,11 +86,33 @@ export function generatePdfContent(dieline: Dieline, margin: number = 5): string
   }
   streamBody += 'EMC\n';
 
+  // 3. Layer DIMENSION (Đường đo và nhãn kích thước)
+  if (dimLines.length > 0) {
+    streamBody += '/OC /OC_DIM BDC\n';
+    streamBody += '0.5 w\n';
+    streamBody += '[] 0 d\n';
+    streamBody += '0.4 0.4 0.4 RG\n'; // Màu xám đậm cho đường nét
+    streamBody += '0.4 0.4 0.4 rg\n'; // Màu xám đậm cho chữ
+
+    for (const d of dimLines) {
+      const x1 = round3((d.start[0] - originX) * MM_TO_PT);
+      const y1 = round3((totalH_mm - (d.start[1] - originY)) * MM_TO_PT);
+      const x2 = round3((d.end[0] - originX) * MM_TO_PT);
+      const y2 = round3((totalH_mm - (d.end[1] - originY)) * MM_TO_PT);
+      const xm = round3((d.mid[0] - originX) * MM_TO_PT);
+      const ym = round3((totalH_mm - (d.mid[1] - originY)) * MM_TO_PT);
+
+      streamBody += `${x1} ${y1} m ${x2} ${y2} l S\n`;
+      streamBody += `BT /F1 8 Tf 1 0 0 1 ${xm} ${ym} Tm (${d.label}) Tj ET\n`;
+    }
+    streamBody += 'EMC\n';
+  }
+
   const writer = new PdfWriter();
 
   // Obj 1: Catalog
   writer.addObject(
-    '<< /Type /Catalog /Pages 2 0 R /OCProperties << /OCGs [4 0 R 5 0 R] /D << /Order [4 0 R 5 0 R] /ON [4 0 R 5 0 R] >> >> >>'
+    '<< /Type /Catalog /Pages 2 0 R /OCProperties << /OCGs [4 0 R 5 0 R 10 0 R] /D << /Order [4 0 R 5 0 R 10 0 R] /ON [4 0 R 5 0 R 10 0 R] >> >> >>'
   );
 
   // Obj 2: Pages
@@ -93,7 +120,7 @@ export function generatePdfContent(dieline: Dieline, margin: number = 5): string
 
   // Obj 3: Page
   writer.addObject(
-    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${totalW_pt} ${totalH_pt}] /TrimBox [${trimMinX_pt} ${trimMinY_pt} ${trimMaxX_pt} ${trimMaxY_pt}] /Resources << /Properties << /OC_CUT 4 0 R /OC_CREASE 5 0 R >> /ColorSpace << /CS_CUT 6 0 R /CS_CREASE 7 0 R >> /ExtGState << /GS_OP 8 0 R >> >> /Contents 9 0 R >>`
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${totalW_pt} ${totalH_pt}] /TrimBox [${trimMinX_pt} ${trimMinY_pt} ${trimMaxX_pt} ${trimMaxY_pt}] /Resources << /Properties << /OC_CUT 4 0 R /OC_CREASE 5 0 R /OC_DIM 10 0 R >> /ColorSpace << /CS_CUT 6 0 R /CS_CREASE 7 0 R >> /Font << /F1 11 0 R >> /ExtGState << /GS_OP 8 0 R >> >> /Contents 9 0 R >>`
   );
 
   // Obj 4: OCG CUT
@@ -115,9 +142,15 @@ export function generatePdfContent(dieline: Dieline, margin: number = 5): string
   // Obj 8: ExtGState Overprint
   writer.addObject('<< /Type /ExtGState /OP true /op true /OPM 1 >>');
 
-  // Obj 9: Content Stream
+  // Obj 9: Content Stream (được thêm sau khi tính xong streamBody)
   const streamLen = streamBody.length;
   writer.addObject(`<< /Length ${streamLen} >>\nstream\n${streamBody}endstream`);
+
+  // Obj 10: OCG DIMENSION
+  writer.addObject('<< /Type /OCG /Name (DIMENSION) >>');
+
+  // Obj 11: Font Helvetica cho kích thước
+  writer.addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
 
   return writer.build();
 }

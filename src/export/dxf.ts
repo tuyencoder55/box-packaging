@@ -1,15 +1,20 @@
 // Xuất file DXF chuẩn AutoCAD R12 (AC1009) cho máy cắt bế CNC và phần mềm CAD
 import { chainSegments, type Polyline } from '../core/chain';
 import type { Dieline } from '../core/types';
+import type { DimensionLine } from '../render2d/dimensions';
 
 function round3(n: number): number {
   return Math.round(n * 1000) / 1000;
 }
 
 /**
- * Sinh nội dung file DXF R12 từ Dieline
+ * Sinh nội dung file DXF R12 từ Dieline kèm các đường kích thước (DIMENSION)
  */
-export function generateDxfContent(dieline: Dieline, margin: number = 5): string {
+export function generateDxfContent(
+  dieline: Dieline,
+  margin: number = 5,
+  dimLines: DimensionLine[] = []
+): string {
   const [minX, minY, , height] = dieline.bbox;
   const originX = minX - margin;
   const originY = minY - margin;
@@ -35,11 +40,12 @@ export function generateDxfContent(dieline: Dieline, margin: number = 5): string
     '0', 'ENDTAB'
   );
 
-  // Bảng LAYER (CUT màu 6 magenta, CREASE màu 5 cyan)
+  // Bảng LAYER (CUT màu 6 magenta, CREASE màu 5 cyan, DIMENSION màu 7 white/light grey)
   lines.push(
-    '0', 'TABLE', '2', 'LAYER', '70', '2',
+    '0', 'TABLE', '2', 'LAYER', '70', '3',
     '0', 'LAYER', '2', 'CUT', '70', '0', '62', '6', '6', 'CONTINUOUS',
     '0', 'LAYER', '2', 'CREASE', '70', '0', '62', '5', '6', 'DASHED',
+    '0', 'LAYER', '2', 'DIMENSION', '70', '0', '62', '7', '6', 'CONTINUOUS',
     '0', 'ENDTAB'
   );
 
@@ -84,6 +90,43 @@ export function generateDxfContent(dieline: Dieline, margin: number = 5): string
   // Ghi các đường CUT
   for (const line of cutLines) {
     writePolyline(line, 'CUT');
+  }
+
+  // Ghi các đường kích thước DIMENSION (nếu có)
+  for (const dim of dimLines) {
+    const x1 = round3(dim.start[0] - originX);
+    const y1 = round3(totalH - (dim.start[1] - originY));
+    const x2 = round3(dim.end[0] - originX);
+    const y2 = round3(totalH - (dim.end[1] - originY));
+    const xm = round3(dim.mid[0] - originX);
+    const ym = round3(totalH - (dim.mid[1] - originY));
+
+    // Đoạn thẳng đo kích thước
+    lines.push(
+      '0', 'LINE',
+      '8', 'DIMENSION',
+      '10', x1.toString(),
+      '20', y1.toString(),
+      '30', '0.0',
+      '11', x2.toString(),
+      '21', y2.toString(),
+      '31', '0.0'
+    );
+
+    // Chữ số đo kích thước (Text cao 3.5mm chuẩn bản vẽ kỹ thuật CAD)
+    lines.push(
+      '0', 'TEXT',
+      '8', 'DIMENSION',
+      '10', xm.toString(),
+      '20', ym.toString(),
+      '30', '0.0',
+      '40', '3.5',
+      '1', dim.label,
+      '72', '1', // Căn giữa Center (horizontal)
+      '11', xm.toString(),
+      '21', ym.toString(),
+      '31', '0.0'
+    );
   }
 
   lines.push('0', 'ENDSEC');

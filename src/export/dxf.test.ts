@@ -25,11 +25,12 @@ describe('export/dxf', () => {
     // Phiên bản R12
     expect(dxf).toContain('AC1009');
 
-    // Chứa 2 kiểu nét và 2 layer
+    // Chứa các layer
     expect(dxf).toContain('CONTINUOUS');
     expect(dxf).toContain('DASHED');
     expect(dxf).toContain('CUT');
     expect(dxf).toContain('CREASE');
+    expect(dxf).toContain('DIMENSION');
 
     // Có các lệnh thực thể POLYLINE, VERTEX, SEQEND
     expect(dxf).toContain('POLYLINE');
@@ -38,5 +39,27 @@ describe('export/dxf', () => {
 
     // Hình vuông cắt có flag 70 = 1 (khép kín)
     expect(dxf).toContain('70\n1');
+  });
+
+  it('sinh layer DIMENSION và text kích thước khi truyền dimLines', () => {
+    const dieline: Dieline = {
+      cut: [],
+      crease: [],
+      polys: [],
+      bbox: [0, 0, 100, 50],
+    };
+
+    const dxf = generateDxfContent(dieline, 5, [
+      {
+        start: [0, 25],
+        end: [100, 25],
+        label: '100 mm',
+        mid: [50, 20],
+      },
+    ]);
+
+    expect(dxf).toContain('LINE\n8\nDIMENSION');
+    expect(dxf).toContain('TEXT\n8\nDIMENSION');
+    expect(dxf).toContain('100 mm');
   });
 });

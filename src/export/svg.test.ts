@@ -3,7 +3,7 @@ import { generateSvgContent } from './svg';
 import type { Dieline } from '../core/types';
 
 describe('export/svg', () => {
-  it('sinh mã SVG chuẩn kỹ thuật với 2 layer CUT và CREASE', () => {
+  it('sinh mã SVG chuẩn kỹ thuật với các layer CUT và CREASE', () => {
     const dieline: Dieline = {
       cut: [
         { a: [0, 0], b: [100, 0] },
@@ -30,5 +30,27 @@ describe('export/svg', () => {
 
     // Đường cắt khép kín có lệnh Z
     expect(svg).toContain('Z');
+  });
+
+  it('sinh layer DIMENSION trong SVG khi truyền dimLines', () => {
+    const dieline: Dieline = {
+      cut: [],
+      crease: [],
+      polys: [],
+      bbox: [0, 0, 100, 50],
+    };
+
+    const svg = generateSvgContent(dieline, 5, [
+      {
+        start: [0, 25],
+        end: [100, 25],
+        label: '100 mm',
+        mid: [50, 20],
+      },
+    ]);
+
+    expect(svg).toContain('id="DIMENSION"');
+    expect(svg).toContain('<line x1="');
+    expect(svg).toContain('<text x="55" y="25" text-anchor="middle">100 mm</text>');
   });
 });

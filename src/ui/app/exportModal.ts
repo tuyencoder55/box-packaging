@@ -1,5 +1,6 @@
 // Hộp thoại xuất file kỹ thuật (Export Modal)
 import type { Dieline } from '../../core/types';
+import type { DimensionLine } from '../../render2d/dimensions';
 import { generateAiContent } from '../../export/ai';
 import { downloadText } from '../../export/download';
 import { generateDxfContent } from '../../export/dxf';
@@ -12,6 +13,7 @@ import type { AppDocState } from './paramPanel';
 export function openExportModal(
   state: AppDocState,
   dieline: Dieline,
+  dimLines: DimensionLine[] = [],
   get3dCanvas?: () => HTMLCanvasElement | null,
 ) {
   // Xoá modal cũ nếu đang mở
@@ -106,7 +108,7 @@ export function openExportModal(
     <div><span style="color:var(--text-muted)">Kích thước hộp:</span> <strong>${state.l} × ${state.w} × ${state.h} mm</strong></div>
     <div><span style="color:var(--text-muted)">Khổ khuôn phẳng:</span> <strong>${sheetW} × ${sheetH} mm</strong></div>
     <div><span style="color:var(--text-muted)">Độ dày giấy:</span> <strong>${state.t} mm</strong></div>
-    <div><span style="color:var(--text-muted)">Quy chuẩn:</span> <strong>Lề 5mm, Layer CUT/CREASE</strong></div>
+    <div><span style="color:var(--text-muted)">Quy chuẩn:</span> <strong>Lề 5mm, Layer CUT/CREASE/DIMENSION</strong></div>
   `;
   body.appendChild(summaryBox);
 
@@ -121,36 +123,36 @@ export function openExportModal(
     {
       ext: 'pdf',
       name: 'PDF Bế in ấn (Khuyên dùng)',
-      desc: 'Layer OCG CUT/CREASE, màu pha Separation CMYK, Overprint',
+      desc: 'Layer OCG CUT/CREASE/DIMENSION, màu pha Separation CMYK, Overprint',
       action: () => {
-        const content = generatePdfContent(dieline, margin);
+        const content = generatePdfContent(dieline, margin, dimLines);
         downloadText(content, `${baseFileName}.pdf`, 'application/pdf');
       },
     },
     {
       ext: 'ai',
       name: 'Adobe Illustrator (.ai)',
-      desc: 'Mở trực tiếp trong Illustrator, giữ nguyên layer và swatch',
+      desc: 'Mở trực tiếp trong Illustrator, giữ nguyên layer và ghi chú kích thước',
       action: () => {
-        const content = generateAiContent(dieline, margin);
+        const content = generateAiContent(dieline, margin, dimLines);
         downloadText(content, `${baseFileName}.ai`, 'application/illustrator');
       },
     },
     {
       ext: 'dxf',
       name: 'AutoCAD DXF R12 (.dxf)',
-      desc: 'Bản vẽ CAD polyline liền cho máy cắt bế CNC, laser',
+      desc: 'Bản vẽ CAD polyline liền kèm layer DIMENSION cho máy cắt bế CNC, laser',
       action: () => {
-        const content = generateDxfContent(dieline, margin);
+        const content = generateDxfContent(dieline, margin, dimLines);
         downloadText(content, `${baseFileName}.dxf`, 'application/dxf');
       },
     },
     {
       ext: 'svg',
       name: 'Vector SVG (.svg)',
-      desc: 'File đồ họa vector chuẩn web, đơn vị mm',
+      desc: 'File đồ họa vector chuẩn web kèm layer DIMENSION, đơn vị mm',
       action: () => {
-        const content = generateSvgContent(dieline, margin);
+        const content = generateSvgContent(dieline, margin, dimLines);
         downloadText(content, `${baseFileName}.svg`, 'image/svg+xml');
       },
     },
@@ -227,3 +229,4 @@ export function openExportModal(
 
   document.body.appendChild(backdrop);
 }
+

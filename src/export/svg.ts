@@ -1,6 +1,7 @@
-// Xuất file khuôn SVG chuẩn kỹ thuật (đơn vị mm, layer CUT/CREASE)
+// Xuất file khuôn SVG chuẩn kỹ thuật (đơn vị mm, layer CUT/CREASE/DIMENSION)
 import { chainSegments, type Polyline } from '../core/chain';
 import type { Dieline } from '../core/types';
+import type { DimensionLine } from '../render2d/dimensions';
 
 function round3(n: number): number {
   return Math.round(n * 1000) / 1000;
@@ -27,7 +28,11 @@ function polylineToPathData(line: Polyline, originX: number, originY: number): s
 /**
  * Sinh nội dung file SVG kỹ thuật có layer riêng biệt cho máy in và máy cắt bế
  */
-export function generateSvgContent(dieline: Dieline, margin: number = 5): string {
+export function generateSvgContent(
+  dieline: Dieline,
+  margin: number = 5,
+  dimLines: DimensionLine[] = []
+): string {
   const [minX, minY, width, height] = dieline.bbox;
 
   // Lề quanh khuôn bế
@@ -48,6 +53,26 @@ export function generateSvgContent(dieline: Dieline, margin: number = 5): string
     .map((line) => `    <path d="${polylineToPathData(line, originX, originY)}" />`)
     .join('\n');
 
+  let dimElements = '';
+  if (dimLines.length > 0) {
+    const dimParts: string[] = [];
+    for (const d of dimLines) {
+      const x1 = round3(d.start[0] - originX);
+      const y1 = round3(d.start[1] - originY);
+      const x2 = round3(d.end[0] - originX);
+      const y2 = round3(d.end[1] - originY);
+      const xm = round3(d.mid[0] - originX);
+      const ym = round3(d.mid[1] - originY);
+
+      dimParts.push(`    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`);
+      dimParts.push(`    <text x="${xm}" y="${ym}" text-anchor="middle">${d.label}</text>`);
+    }
+    dimElements = `  <!-- Layer DIMENSION (Đường đo và nhãn kích thước) -->
+  <g id="DIMENSION" fill="#666666" stroke="#888888" stroke-width="0.2" font-size="3" font-family="Arial, sans-serif">
+${dimParts.join('\n')}
+  </g>\n`;
+  }
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg"
      width="${totalW}mm"
@@ -61,5 +86,5 @@ ${creasePaths}
   <g id="CUT" fill="none" stroke="#ff00ff" stroke-width="0.25">
 ${cutPaths}
   </g>
-</svg>`;
+${dimElements}</svg>`;
 }

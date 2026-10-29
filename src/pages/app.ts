@@ -6,7 +6,7 @@ import { transformDieline } from '../core/orient';
 import { createStore } from '../core/store';
 import { calcEffectiveParams } from '../core/thickness';
 import type { Dieline } from '../core/types';
-import { buildDimensionLines } from '../render2d/dimensions';
+import { buildDimensionLines, type DimensionLine } from '../render2d/dimensions';
 import { renderSvgView } from '../render2d/svgView';
 import { setupZoomPan, type ZoomPanController } from '../render2d/zoomPan';
 import { initMockupCard, type MockupCardController } from '../ui/app/mockupCard';
@@ -167,6 +167,7 @@ function initStudio() {
   const mockupContainer = document.getElementById('mockup-card');
   let mockupController: MockupCardController | null = null;
   let currentDieline: Dieline | null = null;
+  let currentDimLines: DimensionLine[] = [];
 
   function switchStep(newStep: StepId) {
     if (newStep === 'mockup') {
@@ -190,7 +191,12 @@ function initStudio() {
       mockupController?.setMode('pip');
     } else if (newStep === 'export') {
       if (currentDieline) {
-        openExportModal(store.get(), currentDieline, () => mockupContainer?.querySelector('canvas') ?? null);
+        openExportModal(
+          store.get(),
+          currentDieline,
+          currentDimLines,
+          () => mockupContainer?.querySelector('canvas') ?? null
+        );
       }
     }
   }
@@ -246,7 +252,12 @@ function initStudio() {
 
     btnExport.addEventListener('click', () => {
       if (currentDieline) {
-        openExportModal(store.get(), currentDieline, () => mockupContainer?.querySelector('canvas') ?? null);
+        openExportModal(
+          store.get(),
+          currentDieline,
+          currentDimLines,
+          () => mockupContainer?.querySelector('canvas') ?? null
+        );
       }
     });
   }
@@ -266,9 +277,16 @@ function initStudio() {
     const orientedDieline = transformDieline(dieline, s.orient);
     currentDieline = orientedDieline;
     const dimLines = buildDimensionLines(boxDef.dims, layouts, { l: s.l, w: s.w, h: s.h }, s.unit);
+    currentDimLines = dimLines;
 
     if (viewport) {
-      const svg = renderSvgView(viewport, orientedDieline, dimLines);
+      const svg = renderSvgView(viewport, orientedDieline, dimLines, {
+        cutColor: s.cutColor,
+        creaseColor: s.creaseColor,
+        dimColor: s.dimColor,
+        dimFont: s.dimFont,
+        dimFontSize: s.dimFontSize,
+      });
       if (!zoomController) {
         zoomController = setupZoomPan(viewport, svg);
       }
