@@ -88,6 +88,80 @@ export function initMockupCard(
   });
   card.appendChild(canvasWrap);
 
+  // Thanh công cụ nổi tiện ích trên khung 3D (Cầm nắm, Xoay, Căn giữa)
+  const floatBar = el('div', {
+    style: `
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(22, 24, 31, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 4px;
+      z-index: 10;
+    `,
+  });
+
+  const btnModeOrbit = el('button', {
+    type: 'button',
+    text: '⤾ Xoay',
+    title: 'Chế độ xoay góc nhìn 3D (Chuột trái)',
+    style: `
+      background: var(--color-primary);
+      color: var(--color-primary-fg);
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    `,
+  });
+
+  const btnModePan = el('button', {
+    type: 'button',
+    text: '✋ Cầm nắm',
+    title: 'Chế độ cầm nắm kéo di chuyển hộp (hoặc giữ chuột phải / Shift)',
+    style: `
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    `,
+  });
+
+  const btnResetCenter = el('button', {
+    type: 'button',
+    text: '⊙ Căn giữa',
+    title: 'Đưa hộp về chính giữa màn hình',
+    style: `
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    `,
+  });
+
+  floatBar.appendChild(btnModeOrbit);
+  floatBar.appendChild(btnModePan);
+  floatBar.appendChild(btnResetCenter);
+  canvasWrap.appendChild(floatBar);
+
   // Thanh điều khiển gập mở bên dưới
   const controlsBar = el('div', {
     style: `
@@ -195,6 +269,26 @@ export function initMockupCard(
 
   btnToggle.addEventListener('click', () => {
     if (animator) animator.toggle();
+  });
+
+  btnModeOrbit.addEventListener('click', () => {
+    sceneCtx.setDragMode('orbit');
+    btnModeOrbit.style.background = 'var(--color-primary)';
+    btnModeOrbit.style.color = 'var(--color-primary-fg)';
+    btnModePan.style.background = 'transparent';
+    btnModePan.style.color = 'var(--text-muted)';
+  });
+
+  btnModePan.addEventListener('click', () => {
+    sceneCtx.setDragMode('pan');
+    btnModePan.style.background = 'var(--color-primary)';
+    btnModePan.style.color = 'var(--color-primary-fg)';
+    btnModeOrbit.style.background = 'transparent';
+    btnModeOrbit.style.color = 'var(--text-muted)';
+  });
+
+  btnResetCenter.addEventListener('click', () => {
+    sceneCtx.resetView();
   });
 
   slider.addEventListener('input', () => {
