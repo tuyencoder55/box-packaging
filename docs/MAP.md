@@ -37,7 +37,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ zoomPan.ts — zoom, kéo
 
 ## src/render3d
-- ⬜ scene.ts — scene/camera/đèn
+- ✅ scene.ts — scene/camera/đèn
 - ⬜ foldModel.ts — cây panel → hộp 3D
 - ⬜ foldAnim.ts — gấp/mở theo bước
 
