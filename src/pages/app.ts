@@ -1,5 +1,5 @@
 import '../styles/base.css';
-import { getBoxDef } from '../boxes';
+import { getAllBoxes, getBoxDef } from '../boxes';
 import { buildDieline } from '../core/dieline';
 import { layoutPanels } from '../core/layout';
 import { transformDieline } from '../core/orient';
@@ -32,16 +32,19 @@ function initStudio() {
     // bỏ qua nếu lỗi parse
   }
 
+  // Nếu chuyển sang loại hộp khác với lưu trong cache, ưu tiên defaults của loại hộp đó
+  const isDifferentBox = saved.boxId && saved.boxId !== boxDef.id;
+
   const initialStore: AppDocState = {
-    boxId: params.get('type') ?? saved.boxId ?? boxDef.id,
-    unit: (params.get('unit') as AppDocState['unit']) ?? saved.unit ?? 'mm',
-    sizeType: (params.get('sizeType') as 'inner' | 'outer') ?? saved.sizeType ?? 'inner',
-    l: Number(params.get('l')) || saved.l || boxDef.defaults.l,
-    w: Number(params.get('w')) || saved.w || boxDef.defaults.w,
-    h: Number(params.get('h')) || saved.h || boxDef.defaults.h,
-    t: Number(params.get('t')) || saved.t || boxDef.defaults.t,
-    compensate: saved.compensate ?? false,
-    opts: saved.opts ?? {},
+    boxId: boxDef.id,
+    unit: (params.get('unit') as AppDocState['unit']) ?? (isDifferentBox ? 'mm' : saved.unit) ?? 'mm',
+    sizeType: (params.get('sizeType') as 'inner' | 'outer') ?? (isDifferentBox ? 'inner' : saved.sizeType) ?? 'inner',
+    l: Number(params.get('l')) || (isDifferentBox ? boxDef.defaults.l : saved.l) || boxDef.defaults.l,
+    w: Number(params.get('w')) || (isDifferentBox ? boxDef.defaults.w : saved.w) || boxDef.defaults.w,
+    h: Number(params.get('h')) || (isDifferentBox ? boxDef.defaults.h : saved.h) || boxDef.defaults.h,
+    t: Number(params.get('t')) || (isDifferentBox ? boxDef.defaults.t : saved.t) || boxDef.defaults.t,
+    compensate: isDifferentBox ? false : (saved.compensate ?? false),
+    opts: isDifferentBox ? {} : (saved.opts ?? {}),
     orient: saved.orient ?? 'normal',
   };
 
@@ -51,12 +54,61 @@ function initStudio() {
   const topBar = document.getElementById('top-bar');
   if (topBar) {
     topBar.style.cssText =
-      'display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 50px; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);';
+      'display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 50px; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); gap: 12px;';
+  }
+
+  // Tinh chỉnh link Thư viện và dropdown chọn hộp
+  const backLink = topBar?.querySelector('a');
+  if (backLink) {
+    backLink.style.cssText =
+      'color: var(--text-secondary); text-decoration: none; font-size: var(--font-size-sm); font-weight: 500; white-space: nowrap;';
+  }
+
+  // Thay thế hoặc gắn bộ chọn hộp vào topBar
+  const titleEl = document.getElementById('doc-title');
+  let metaSpan: HTMLElement | null = null;
+  if (titleEl) {
+    titleEl.innerHTML = '';
+    titleEl.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+
+    const select = document.createElement('select');
+    select.id = 'box-select';
+    select.style.cssText = `
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    `;
+
+    const allBoxes = getAllBoxes();
+    allBoxes.forEach((b) => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = `${b.name} (${b.code ?? b.id})`;
+      if (b.id === boxDef.id) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    select.addEventListener('change', () => {
+      window.location.search = `?type=${encodeURIComponent(select.value)}`;
+    });
+
+    metaSpan = document.createElement('span');
+    metaSpan.id = 'doc-meta';
+    metaSpan.style.cssText = 'font-size: var(--font-size-xs); color: var(--text-secondary);';
+
+    titleEl.appendChild(select);
+    titleEl.appendChild(metaSpan);
   }
 
   const saveStatus = document.getElementById('save-status');
   if (saveStatus) {
-    saveStatus.style.cssText = 'font-size: var(--font-size-xs); color: var(--text-muted); margin-left: 8px;';
+    saveStatus.style.cssText = 'font-size: var(--font-size-xs); color: var(--text-muted); margin-left: 4px;';
   }
 
   const stepBarContainer = document.getElementById('step-bar');
@@ -95,10 +147,9 @@ function initStudio() {
   let zoomController: ZoomPanController | null = null;
 
   function updateDielineView(s: AppDocState) {
-    const titleEl = document.getElementById('doc-title');
-    if (titleEl) {
+    if (metaSpan) {
       const mode = s.sizeType === 'outer' ? 'phủ bì' : 'lòng';
-      titleEl.textContent = `${boxDef.name} (${s.l}×${s.w}×${s.h} mm, ${mode})`;
+      metaSpan.textContent = `— ${s.l}×${s.w}×${s.h} mm (${mode})`;
     }
 
     const effectiveParams = calcEffectiveParams(s);

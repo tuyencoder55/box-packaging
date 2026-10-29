@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: P3 (xong P3.5, chuẩn bị P3.6)
+Đang ở: Hoàn thành Phase P3 (chuẩn bị sang P4)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -22,13 +22,13 @@
   - [x] P2.4 render2d/zoomPan.ts + thanh zoom %
   - [x] P2.5 core/orient.ts + nút Chuẩn/Lật/Xoay
   - [x] P2.6 Lưu localStorage + trạng thái "Đã lưu", stepBar.ts
-- [ ] P3 Thêm hộp + Thư viện mẫu
+- [x] P3 Thêm hộp + Thư viện mẫu
   - [x] P3.1 boxes/fefco-0427.ts (hộp mailer cuộn mép) + test
   - [x] P3.2 boxes/tuck-end-straight.ts + test
   - [x] P3.3 boxes/tuck-end-reverse.ts + test
   - [x] P3.4 boxes/auto-lock-bottom.ts + test
   - [x] P3.5 ui/templates/* + pages/templates.ts (lưới thẻ, lọc nhóm)
-  - [ ] P3.6 Nút "Dùng mẫu này" + bộ chọn loại hộp trong Studio
+  - [x] P3.6 Nút "Dùng mẫu này" + bộ chọn loại hộp trong Studio
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
 - [ ] P4 Mockup 3D
 - [ ] P4b Màu và ảnh lên mặt hộp 3D
@@ -66,3 +66,4 @@
 - 2026-10-29 P3.3: boxes/tuck-end-reverse.ts (hộp nắp gài ngược RTE) và unit tests (43 tests xanh)
 - 2026-10-29 P3.4: boxes/auto-lock-bottom.ts (hộp đáy khoá tự động ALB) và unit tests (46 tests xanh)
 - 2026-10-29 P3.5: ui/templates/filterBar.ts + cardGrid.ts + pages/templates.ts (lưới thẻ, thumbnail vector, lọc nhóm)
+- 2026-10-29 P3.6: dropdown bộ chọn loại hộp trên topBar Studio app.html, hoàn thành toàn bộ Phase P3
