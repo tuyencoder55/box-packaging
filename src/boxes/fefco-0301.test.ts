@@ -68,4 +68,27 @@ describe('fefco-0301', () => {
     expect(face!.len).toBeGreaterThan(l);
     expect(face!.depth).toBeGreaterThan(w);
   });
+
+  it('hỗ trợ cấu hình độ rộng rãnh xẻ (slotWidth) chuẩn xác cho các góc chạp', () => {
+    const slot = 8;
+    const h = 100;
+    const w = 400;
+
+    const nodes = fefco0301.build({
+      l: 600,
+      w,
+      h,
+      t: 5,
+      opts: { part: 'base', slotWidth: slot },
+    });
+
+    // Thành trái bị trừ đúng khe rãnh s ở 2 đầu
+    const wallLeft = nodes.find((n) => n.id === 'tray-base-wall-left')!;
+    expect(wallLeft.len).toBe(w - slot);
+    expect(wallLeft.offset).toBe(slot / 2);
+
+    // Tai góc có chiều dài trừ đúng s/2
+    const cornerTL = nodes.find((n) => n.id === 'tray-base-corner-tl')!;
+    expect(cornerTL.len).toBe(h - slot / 2);
+  });
 });

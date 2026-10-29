@@ -41,6 +41,14 @@ export const fefco0301: BoxDef = {
       min: 2,
       max: 25,
     },
+    {
+      key: 'slotWidth',
+      label: 'Độ rộng rãnh xẻ (Slot)',
+      type: 'number',
+      default: 6,
+      min: 0,
+      max: 15,
+    },
   ],
   dims: [
     { panelId: 'tray-base-face', axis: 'u', param: 'l' },
@@ -58,8 +66,13 @@ export const fefco0301: BoxDef = {
     // Chiều cao thành nắp: mặc định bằng chiều cao đáy h (hoặc theo tùy chọn lidHeight)
     const hLid = Number(p.opts?.lidHeight ?? h);
 
+    // Độ rộng rãnh xẻ (Slot): mặc định 6mm cho carton 3 lớp (t <= 3mm), 8mm cho carton 5 lớp (t > 3mm)
+    const defaultSlot = t > 3 ? 8 : 6;
+    const s = Math.max(0, Number(p.opts?.slotWidth ?? defaultSlot));
+    const halfS = s / 2;
+
     // Kích thước nắp tự động tính bù theo kích thước đáy:
-    // Chiều dài nắp nhỉnh hơn (clearance * 1.5 để nắp trùm êm)
+    // Chiều dài nắp nhỉnh hơn (clearance * 1.4 để nắp trùm êm)
     // Chiều rộng nắp nhỉnh hơn clearance
     const lLid = Math.round(l + clearance * 1.4);
     const wLid = Math.round(w + clearance);
@@ -67,7 +80,7 @@ export const fefco0301: BoxDef = {
     const nodes: PanelNode[] = [];
 
     /**
-     * Dựng 1 khay carton nguyên tấm chữ nhật (có 4 đường xẻ chạp ở 4 góc)
+     * Dựng 1 khay carton nguyên tấm chữ nhật (có 4 khe rãnh xẻ chạp slotWidth ở 4 góc)
      */
     function createSlottedTray(
       prefix: string,
@@ -91,62 +104,77 @@ export const fefco0301: BoxDef = {
         label: `Mặt ${labelName}`,
       });
 
-      // 2. Thành trên
+      // 2. Thành trên và thành dưới
+      // Nếu xẻ dọc: khe rãnh nằm ở 2 đầu thành trên & dưới (offset = halfS, len = length - s)
+      // Nếu xẻ ngang: thành trên & dưới giữ nguyên chiều dài full
+      const topBotOffset = slitDir === 'vertical' ? halfS : 0;
+      const topBotLen = slitDir === 'vertical' ? Math.max(10, length - s) : length;
+
       nodes.push({
         id: `tray-${prefix}-wall-top`,
         parent: `tray-${prefix}-face`,
         edge: 'top',
-        len: length,
+        offset: topBotOffset,
+        len: topBotLen,
         depth: height,
         fold: 90,
         step: 1,
         label: `${labelName} - Thành trên`,
       });
 
-      // 3. Thành dưới
       nodes.push({
         id: `tray-${prefix}-wall-bottom`,
         parent: `tray-${prefix}-face`,
         edge: 'bottom',
-        len: length,
+        offset: topBotOffset,
+        len: topBotLen,
         depth: height,
         fold: 90,
         step: 1,
         label: `${labelName} - Thành dưới`,
       });
 
-      // 4. Thành trái
+      // 3. Thành trái và thành phải
+      // Nếu xẻ ngang: khe rãnh nằm ở 2 đầu thành trái & phải (offset = halfS, len = width - s)
+      // Nếu xẻ dọc: thành trái & phải giữ nguyên chiều dài full
+      const leftRightOffset = slitDir === 'horizontal' ? halfS : 0;
+      const leftRightLen = slitDir === 'horizontal' ? Math.max(10, width - s) : width;
+
       nodes.push({
         id: `tray-${prefix}-wall-left`,
         parent: `tray-${prefix}-face`,
         edge: 'left',
-        len: width,
+        offset: leftRightOffset,
+        len: leftRightLen,
         depth: height,
         fold: 90,
         step: 1,
         label: `${labelName} - Thành trái`,
       });
 
-      // 5. Thành phải
       nodes.push({
         id: `tray-${prefix}-wall-right`,
         parent: `tray-${prefix}-face`,
         edge: 'right',
-        len: width,
+        offset: leftRightOffset,
+        len: leftRightLen,
         depth: height,
         fold: 90,
         step: 1,
         label: `${labelName} - Thành phải`,
       });
 
-      // 6. 4 góc vuông (Tai bấm ghim / dán keo)
+      // 4. 4 góc vuông (Tai bấm ghim / dán keo) tạo khe rãnh rộng s chuẩn xác
+      const tabLen = Math.max(10, height - halfS);
+
       if (slitDir === 'vertical') {
-        // Xẻ dọc: 4 góc vuông H × H gắn vào thành trái & thành phải (Chuẩn Nắp)
+        // Xẻ dọc: 4 góc vuông gắn vào thành trái & thành phải (Chuẩn Nắp)
         nodes.push({
           id: `tray-${prefix}-corner-tl`,
           parent: `tray-${prefix}-wall-left`,
           edge: 'top',
-          len: height,
+          offset: 0,
+          len: tabLen,
           depth: height,
           fold: 90,
           step: 2,
@@ -158,7 +186,8 @@ export const fefco0301: BoxDef = {
           id: `tray-${prefix}-corner-bl`,
           parent: `tray-${prefix}-wall-left`,
           edge: 'bottom',
-          len: height,
+          offset: 0,
+          len: tabLen,
           depth: height,
           fold: 90,
           step: 2,
@@ -170,7 +199,8 @@ export const fefco0301: BoxDef = {
           id: `tray-${prefix}-corner-tr`,
           parent: `tray-${prefix}-wall-right`,
           edge: 'top',
-          len: height,
+          offset: halfS,
+          len: tabLen,
           depth: height,
           fold: 90,
           step: 2,
@@ -182,7 +212,8 @@ export const fefco0301: BoxDef = {
           id: `tray-${prefix}-corner-br`,
           parent: `tray-${prefix}-wall-right`,
           edge: 'bottom',
-          len: height,
+          offset: halfS,
+          len: tabLen,
           depth: height,
           fold: 90,
           step: 2,
@@ -190,12 +221,13 @@ export const fefco0301: BoxDef = {
           glue: true,
         });
       } else {
-        // Xẻ ngang: 4 góc vuông H × H gắn vào thành trên & thành dưới (Chuẩn Đáy)
+        // Xẻ ngang: 4 góc vuông gắn vào thành trên & thành dưới (Chuẩn Đáy)
         nodes.push({
           id: `tray-${prefix}-corner-tl`,
           parent: `tray-${prefix}-wall-top`,
           edge: 'left',
-          len: height,
+          offset: 0,
+          len: tabLen,
           depth: height,
           fold: 90,
           step: 2,
@@ -207,7 +239,8 @@ export const fefco0301: BoxDef = {
           id: `tray-${prefix}-corner-tr`,
           parent: `tray-${prefix}-wall-top`,
           edge: 'right',
-          len: height,
+          offset: 0,
+          len: tabLen,
           depth: height,
           fold: 90,
           step: 2,
@@ -219,7 +252,8 @@ export const fefco0301: BoxDef = {
           id: `tray-${prefix}-corner-bl`,
           parent: `tray-${prefix}-wall-bottom`,
           edge: 'left',
-          len: height,
+          offset: halfS,
+          len: tabLen,
           depth: height,
           fold: 90,
           step: 2,
@@ -231,7 +265,8 @@ export const fefco0301: BoxDef = {
           id: `tray-${prefix}-corner-br`,
           parent: `tray-${prefix}-wall-bottom`,
           edge: 'right',
-          len: height,
+          offset: halfS,
+          len: tabLen,
           depth: height,
           fold: 90,
           step: 2,
