@@ -46,6 +46,8 @@ Quy tắc: bộ phận là hàm thuần `(args) => PanelNode[]`, gắn vào pane
 | auto-lock-bottom | Hộp đáy khoá tự động | 3 | 80×50×140 | docs/ref/studio-pacvina.png | ✅ |
 | snap-lock-bottom | Hộp đáy khoá cài 1-2-3 | 2 | 80×60×140 | Packfino ECMA A50.20 | ✅ |
 | hang-tab-tuck-end | Hộp nắp gài có tai treo | 2 | 75×30×120 | Packfino ECMA A20 | ✅ |
+| snap-lock-hang-tab | Hộp tai treo đáy khoá cài 1-2-3 | 2 | 75×40×120 | Packfino ECMA A50 | ✅ |
+| crash-lock-hang-tab | Hộp tai treo đáy khoá tự động | 3 | 75×40×120 | Packfino ECMA A60 | ✅ |
 | tuck-top-glued-bottom | Hộp nắp gài trên đáy dán keo | 2 | 80×50×140 | Packfino ECMA A20/A10 | ✅ |
 | seal-end-carton | Hộp dán keo hai đầu | 2 | 100×50×150 | Packfino ECMA A10.20 | ✅ |
 

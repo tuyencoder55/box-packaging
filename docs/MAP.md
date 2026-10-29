@@ -30,6 +30,8 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ auto-lock-bottom.ts — hộp đáy khoá tự động
 - ✅ snap-lock-bottom.ts — hộp đáy khoá cài 1-2-3
 - ✅ hang-tab-tuck-end.ts — hộp nắp gài có tai treo
+- ✅ snap-lock-hang-tab.ts — hộp tai treo đáy khoá cài 1-2-3
+- ✅ crash-lock-hang-tab.ts — hộp tai treo đáy khoá tự động
 - ✅ tuck-top-glued-bottom.ts — hộp nắp gài trên đáy dán keo
 - ✅ seal-end-carton.ts — hộp dán keo hai đầu
 

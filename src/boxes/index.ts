@@ -1,5 +1,6 @@
 // Danh sách đăng ký các loại hộp (BoxDef Registry)
 import { autoLockBottom } from './auto-lock-bottom';
+import { crashLockHangTab } from './crash-lock-hang-tab';
 import { fefco0201 } from './fefco-0201';
 import { fefco0203 } from './fefco-0203';
 import { fefco0301 } from './fefco-0301';
@@ -7,6 +8,7 @@ import { fefco0427 } from './fefco-0427';
 import { hangTabTuckEnd } from './hang-tab-tuck-end';
 import { sealEndCarton } from './seal-end-carton';
 import { snapLockBottom } from './snap-lock-bottom';
+import { snapLockHangTab } from './snap-lock-hang-tab';
 import { tuckEndReverse } from './tuck-end-reverse';
 import { tuckEndStraight } from './tuck-end-straight';
 import { tuckTopGluedBottom } from './tuck-top-glued-bottom';
@@ -22,6 +24,8 @@ export const BOX_REGISTRY: Record<string, BoxDef> = {
   'auto-lock-bottom': autoLockBottom,
   'snap-lock-bottom': snapLockBottom,
   'hang-tab-tuck-end': hangTabTuckEnd,
+  'snap-lock-hang-tab': snapLockHangTab,
+  'crash-lock-hang-tab': crashLockHangTab,
   'tuck-top-glued-bottom': tuckTopGluedBottom,
   'seal-end-carton': sealEndCarton,
 };
