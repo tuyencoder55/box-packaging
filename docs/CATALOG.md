@@ -37,11 +37,17 @@ Quy tắc: bộ phận là hàm thuần `(args) => PanelNode[]`, gắn vào pane
 
 | Mã nội bộ (id) | Tên hiển thị | Nhóm | Kích thước mặc định L×W×H (mm) | Ảnh tham chiếu (docs/ref/…) | Trạng thái |
 |---|---|---|---|---|---|
-| fefco-0201 | Thùng carton RSC | 1 | — | — | ⬜ |
-| fefco-0427 | Mailer cuộn mép | 4 | — | — | ⬜ |
-| tuck-end-straight | Hộp nắp gài thẳng | 2 | — | — | ⬜ |
-| tuck-end-reverse | Hộp nắp gài ngược | 2 | — | — | ⬜ |
-| auto-lock-bottom | Hộp đáy khoá tự động | 3 | 80×50×140 | docs/ref/studio-pacvina.png | ⬜ |
+| fefco-0201 | Thùng carton RSC | 1 | 300×200×150 | — | ✅ |
+| fefco-0203 | Thùng carton nắp chồng FOL | 1 | 300×200×200 | — | ✅ |
+| fefco-0301 | Hộp âm dương (nắp đáy rời) | 1 | 200×150×80 | — | ✅ |
+| fefco-0427 | Mailer cuộn mép | 4 | 200×150×50 | — | ✅ |
+| tuck-end-straight | Hộp nắp gài thẳng | 2 | 80×50×140 | — | ✅ |
+| tuck-end-reverse | Hộp nắp gài ngược | 2 | 80×50×140 | — | ✅ |
+| auto-lock-bottom | Hộp đáy khoá tự động | 3 | 80×50×140 | docs/ref/studio-pacvina.png | ✅ |
+| snap-lock-bottom | Hộp đáy khoá cài 1-2-3 | 2 | 80×60×140 | Packfino ECMA A50.20 | ✅ |
+| hang-tab-tuck-end | Hộp nắp gài có tai treo | 2 | 75×30×120 | Packfino ECMA A20 | ✅ |
+| tuck-top-glued-bottom | Hộp nắp gài trên đáy dán keo | 2 | 80×50×140 | Packfino ECMA A20/A10 | ✅ |
+| seal-end-carton | Hộp dán keo hai đầu | 2 | 100×50×150 | Packfino ECMA A10.20 | ✅ |
 
 (Thêm dòng mới ở cuối bảng khi người dùng cung cấp mẫu.)
 

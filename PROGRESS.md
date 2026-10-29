@@ -94,3 +94,4 @@
 - 2026-10-29 P5.4: export/pdfWriter.ts + pdf.ts tự viết bộ ghi PDF, 2 layer OCG, màu pha Separation CMYK và xref chuẩn byte offset (58 tests xanh)
 - 2026-10-29 P5.5 & P5.6 & P5.7: export/ai.ts, export/png.ts, ui/app/exportModal.ts và tích hợp tải đủ 5 định dạng (PDF/AI/DXF/SVG/PNG), hoàn thành Phase P5 (58 tests xanh)
 - 2026-10-29 P6.1 & P6.2: Hoàn thiện trang chủ index.html, pages/home.ts và kiểm tra build tĩnh dist/ thành công 100%
+- 2026-10-29 P3b.Tuck: Nhập 4 mẫu hộp nắp gài mới từ Packfino (snap-lock-bottom, hang-tab-tuck-end, tuck-top-glued-bottom, seal-end-carton) + 4 unit tests (82 tests xanh 100%)

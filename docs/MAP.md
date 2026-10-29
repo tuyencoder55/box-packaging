@@ -28,6 +28,10 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ tuck-end-straight.ts — hộp nắp gài thẳng
 - ✅ tuck-end-reverse.ts — hộp nắp gài ngược
 - ✅ auto-lock-bottom.ts — hộp đáy khoá tự động
+- ✅ snap-lock-bottom.ts — hộp đáy khoá cài 1-2-3
+- ✅ hang-tab-tuck-end.ts — hộp nắp gài có tai treo
+- ✅ tuck-top-glued-bottom.ts — hộp nắp gài trên đáy dán keo
+- ✅ seal-end-carton.ts — hộp dán keo hai đầu
 
 - ⬜ parts/*.ts — bộ phận dùng chung giữa các hộp (tuckLid, dustFlap, autoLockBottom, glueFlap…), mỗi file một bộ phận
 
