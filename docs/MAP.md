@@ -11,9 +11,9 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 - ✅ 🧊 vite.config.ts — cấu hình multi-page
 
 ## src/core (logic thuần, có test)
-- ⬜ 🧊 types.ts — kiểu dữ liệu dùng chung
-- ⬜ units.ts — đổi mm/cm/inch
-- ⬜ store.ts — kho trạng thái + subscribe theo slice
+- ✅ 🧊 types.ts — kiểu dữ liệu dùng chung
+- ✅ units.ts — đổi mm/cm/inch
+- ✅ store.ts — kho trạng thái + subscribe theo slice
 - ⬜ shapes.ts — hàm tạo đa giác (rect, vát, bo, hình thang)
 - ⬜ layout.ts — cây panel → toạ độ phẳng
 - ⬜ dieline.ts — toạ độ phẳng → đường cắt/cấn
