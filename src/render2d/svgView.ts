@@ -82,9 +82,13 @@ export function renderSvgView(
     gDims.setAttribute('id', 'layer-dimensions');
     gDims.setAttribute('class', 'dims-layer');
 
-    svg.appendChild(gCrease);
-    svg.appendChild(gCut);
-    svg.appendChild(gDims);
+    const gContent = document.createElementNS(svgNs, 'g');
+    gContent.setAttribute('class', 'viewport-content');
+
+    gContent.appendChild(gCrease);
+    gContent.appendChild(gCut);
+    gContent.appendChild(gDims);
+    svg.appendChild(gContent);
     container.appendChild(svg);
     container.appendChild(createLegend());
   }

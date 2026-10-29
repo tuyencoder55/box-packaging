@@ -6,6 +6,7 @@ import { createStore } from '../core/store';
 import { calcEffectiveParams } from '../core/thickness';
 import { buildDimensionLines } from '../render2d/dimensions';
 import { renderSvgView } from '../render2d/svgView';
+import { setupZoomPan, type ZoomPanController } from '../render2d/zoomPan';
 import { initParamPanel, type AppDocState } from '../ui/app/paramPanel';
 
 // Điểm vào trang Studio: kết nối thanh tham số, khung 2D, mockup 3D và xuất file
@@ -53,6 +54,8 @@ function initStudio() {
       'flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;';
   }
 
+  let zoomController: ZoomPanController | null = null;
+
   function updateDielineView(s: AppDocState) {
     const titleEl = document.getElementById('doc-title');
     if (titleEl) {
@@ -67,7 +70,10 @@ function initStudio() {
     const dimLines = buildDimensionLines(boxDef.dims, layouts, { l: s.l, w: s.w, h: s.h }, s.unit);
 
     if (viewport) {
-      renderSvgView(viewport, dieline, dimLines);
+      const svg = renderSvgView(viewport, dieline, dimLines);
+      if (!zoomController) {
+        zoomController = setupZoomPan(viewport, svg);
+      }
     }
   }
 

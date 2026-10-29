@@ -34,7 +34,7 @@ Trạng thái: ⬜ chưa tạo · ✅ đã có · 🧊 đóng băng (không sử
 ## src/render2d
 - ✅ svgView.ts — vẽ khuôn SVG
 - ✅ dimensions.ts — đường kích thước + nhãn
-- ⬜ zoomPan.ts — zoom, kéo
+- ✅ zoomPan.ts — zoom, kéo
 
 ## src/render3d
 - ⬜ scene.ts — scene/camera/đèn
