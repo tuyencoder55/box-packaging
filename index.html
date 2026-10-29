@@ -3,22 +3,70 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BoxMaker — Tạo khuôn hộp & Mockup 3D</title>
+    <title>BoxMaker — Công cụ thiết kế khuôn bế & Mockup 3D hộp carton, bao bì</title>
   </head>
   <body>
-    <div id="app">
-      <header>
-        <h1>BoxMaker</h1>
-        <p>Công cụ tạo khuôn hộp và thùng carton trực quan</p>
-      </header>
-      <main>
-        <nav>
-          <a href="/templates.html">Xem thư viện mẫu</a>
-          <a href="/app.html">Mở Studio</a>
+    <div id="home-app">
+      <!-- Navbar -->
+      <header class="home-nav">
+        <div class="nav-brand">
+          <span class="logo-box">📦</span>
+          <span class="logo-text">BoxMaker</span>
+        </div>
+        <nav class="nav-links">
+          <a href="/templates.html">Thư viện mẫu</a>
+          <a href="/app.html" class="btn-nav-studio">Mở Studio →</a>
         </nav>
-      </main>
+      </header>
+
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-badge">Hoàn toàn miễn phí • Không cần đăng nhập • 100% Trong trình duyệt</div>
+        <h1 class="hero-title">Thiết kế khuôn bế &<br /><span class="gradient-text">Mô phỏng Mockup 3D</span> chuẩn in ấn</h1>
+        <p class="hero-subtitle">
+          Tự động tính toán đường bế, nếp cấn, bù độ dày giấy lòng/phủ bì và xuất file công nghiệp cho máy in, máy cắt CNC (PDF, AI, DXF, SVG).
+        </p>
+        <div class="hero-actions">
+          <a href="/app.html" class="btn-primary-large">Bắt đầu thiết kế ngay 🚀</a>
+          <a href="/templates.html" class="btn-secondary-large">Khám phá thư viện hộp 📚</a>
+        </div>
+      </section>
+
+      <!-- Feature Grid -->
+      <section class="features-section">
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📐</div>
+            <h3>Khuôn bế 2D chính xác</h3>
+            <p>Phân loại đường cắt dao nét liền và nếp cấn nét đứt, tự động tính đường đo kích thước và bù độ dày giấy chuẩn xác.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎲</div>
+            <h3>Mockup 3D tương tác</h3>
+            <p>Mô phỏng hộp 3D chân thực bằng Three.js với thanh trượt gập mở nắp hộp theo bước, xoay 360 độ góc nhìn.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🏭</div>
+            <h3>Xuất file chuẩn công nghiệp</h3>
+            <p>Xuất PDF với 2 Layer in OCG, màu pha Separation CMYK, Overprint, file AI cho Illustrator và DXF R12 cho máy cắt CNC.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured Boxes Carousel / Grid -->
+      <section class="featured-boxes-section">
+        <div class="section-header">
+          <h2>Các loại hộp thông dụng</h2>
+          <p>Chọn nhanh một mẫu để bắt đầu tinh chỉnh kích thước</p>
+        </div>
+        <div id="featured-grid" class="featured-grid"></div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="home-footer">
+        <p>© 2026 BoxMaker — Nền tảng thiết kế bao bì và tạo khuôn bế trực tuyến.</p>
+      </footer>
     </div>
     <script type="module" src="/src/pages/home.ts"></script>
   </body>
 </html>
-

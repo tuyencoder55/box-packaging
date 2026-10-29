@@ -1,6 +1,6 @@
 # PROGRESS
 
-Đang ở: Hoàn thành Phase P5 (chuẩn bị sang P6)
+Đang ở: Hoàn thành toàn bộ Phase P0 -> P6 (Sẵn sàng nghiệm thu)
 
 ## Phase
 - [x] P0 Khung dự án
@@ -43,6 +43,9 @@
   - [x] P5.5 export/ai.ts (Adobe Illustrator)
   - [x] P5.6 export/png.ts (chụp ảnh 3D)
   - [x] P5.7 ui/app/exportModal.ts (giao diện tải đủ 5 định dạng)
+- [x] P6 Trang chủ + hoàn thiện
+  - [x] P6.1 index.html + pages/home.ts (Hero section, tính năng, lưới xem nhanh mẫu hộp)
+  - [x] P6.2 npm run build ra dist/ tĩnh 100% không lỗi
 - [ ] P3b Mở rộng đủ thư viện mẫu (xem docs/CATALOG.md)
 - [ ] P4 Mockup 3D
 - [ ] P4b Màu và ảnh lên mặt hộp 3D
@@ -90,3 +93,4 @@
 - 2026-10-29 P5.3: export/dxf.ts xuất file DXF R12 AC1009 cho máy cắt bế CNC và CAD (57 tests xanh)
 - 2026-10-29 P5.4: export/pdfWriter.ts + pdf.ts tự viết bộ ghi PDF, 2 layer OCG, màu pha Separation CMYK và xref chuẩn byte offset (58 tests xanh)
 - 2026-10-29 P5.5 & P5.6 & P5.7: export/ai.ts, export/png.ts, ui/app/exportModal.ts và tích hợp tải đủ 5 định dạng (PDF/AI/DXF/SVG/PNG), hoàn thành Phase P5 (58 tests xanh)
+- 2026-10-29 P6.1 & P6.2: Hoàn thiện trang chủ index.html, pages/home.ts và kiểm tra build tĩnh dist/ thành công 100%
