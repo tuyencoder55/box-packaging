@@ -13,6 +13,7 @@ import { initMockupCard, type MockupCardController } from '../ui/app/mockupCard'
 import { openExportModal } from '../ui/app/exportModal';
 import { initParamPanel, type AppDocState } from '../ui/app/paramPanel';
 import { createStepBar, type StepId } from '../ui/app/stepBar';
+import { generateImportedDimensions } from '../importer/dimensionGenerator';
 import { openImporterModal } from '../ui/importer/importerModal';
 
 // Điểm vào trang Studio: kết nối thanh tham số, khung 2D, mockup 3D và xuất file
@@ -312,24 +313,30 @@ function initStudio() {
     l: number,
     w: number,
     h: number,
-    name: string
+    name: string,
+    structure?: any
   ) {
     isCustomImported = true;
     currentDieline = dieline;
-    currentDimLines = [
-      {
-        start: [dieline.bbox[0], dieline.bbox[1]],
-        end: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1]],
-        label: `Khổ phôi ngang: ${Math.round(dieline.bbox[2])} mm`,
-        mid: [dieline.bbox[0] + dieline.bbox[2] / 2, dieline.bbox[1] - 15],
-      },
-      {
-        start: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1]],
-        end: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1] + dieline.bbox[3]],
-        label: `Khổ phôi dọc: ${Math.round(dieline.bbox[3])} mm`,
-        mid: [dieline.bbox[0] + dieline.bbox[2] + 15, dieline.bbox[1] + dieline.bbox[3] / 2],
-      },
-    ];
+
+    if (structure) {
+      currentDimLines = generateImportedDimensions(structure, l, w, h, dieline.bbox);
+    } else {
+      currentDimLines = [
+        {
+          start: [dieline.bbox[0], dieline.bbox[1]],
+          end: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1]],
+          label: `Khổ phôi ngang: ${Math.round(dieline.bbox[2])} mm`,
+          mid: [dieline.bbox[0] + dieline.bbox[2] / 2, dieline.bbox[1] - 15],
+        },
+        {
+          start: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1]],
+          end: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1] + dieline.bbox[3]],
+          label: `Khổ phôi dọc: ${Math.round(dieline.bbox[3])} mm`,
+          mid: [dieline.bbox[0] + dieline.bbox[2] + 15, dieline.bbox[1] + dieline.bbox[3] / 2],
+        },
+      ];
+    }
 
     if (metaSpan) {
       metaSpan.innerHTML = `— <b style="color:var(--color-primary);">${name}</b> (${l}×${w}×${h} mm)`;
@@ -386,7 +393,7 @@ function initStudio() {
       const rawImported = sessionStorage.getItem('boxmaker:imported_dieline');
       if (rawImported) {
         const parsed = JSON.parse(rawImported);
-        loadImportedDieline(parsed.dieline, parsed.l, parsed.w, parsed.h, parsed.name);
+        loadImportedDieline(parsed.dieline, parsed.l, parsed.w, parsed.h, parsed.name, parsed.structure);
       } else {
         updateDielineView(store.get());
       }

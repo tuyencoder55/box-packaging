@@ -9,6 +9,13 @@ import { autoDetectStructure, rescaleDieline } from './parametricScaler';
 import { parseSvgString } from './svgParser';
 import type { ImportedDieline } from './types';
 import { buildDimensionLines } from '../render2d/dimensions';
+import { generateImportedDimensions } from './dimensionGenerator';
+import {
+  deleteCustomTemplate,
+  getCustomTemplateById,
+  getCustomTemplates,
+  saveCustomTemplate,
+} from './customTemplateStore';
 
 describe('Smart DXF & SVG Importer + Parametric Resizer', () => {
   // Chuẩn bị dieline mẫu chuẩn (Reverse Tuck End: L=80, W=50, H=140, g=15)
@@ -143,4 +150,65 @@ describe('Smart DXF & SVG Importer + Parametric Resizer', () => {
     // Chiều cao mới: nắp trên (125) + thân (200) + nắp đáy (125) = 450mm
     expect(newH).toBeCloseTo(450, 1);
   });
+
+  it('tự động tạo chuỗi đường kích thước kỹ thuật (DIM) chuẩn CAD cho bản vẽ nhập ngoài', () => {
+    const fefco = getBoxDef('fefco-0201')!;
+    const fPanels = fefco.build({ l: 300, w: 200, h: 150, t: 4, opts: {} });
+    const fLayout = layoutPanels(fPanels);
+    const fDieline = buildDieline(fLayout);
+    const dxfString = generateDxfContent(fDieline);
+    const parsed = parseDxfString(dxfString);
+    const structure = autoDetectStructure(parsed.segments, parsed.bbox);
+
+    const dims = generateImportedDimensions(structure, 300, 200, 150, parsed.bbox);
+    expect(dims.length).toBeGreaterThan(10);
+
+    // Kiểm tra có đầy đủ nhãn kích thước của các panel: lưỡi dán (35), dài (300), rộng (200), cao (150), tổng ngang (1035), tổng dọc (350)
+    const labels = dims.map((d) => d.label).filter(Boolean);
+    expect(labels).toContain('35');
+    expect(labels).toContain('300');
+    expect(labels).toContain('200');
+    expect(labels).toContain('150');
+    expect(labels).toContain('1035');
+    expect(labels).toContain('350');
+  });
+
+  it('lưu, đọc, tìm kiếm và xoá mẫu hộp tự tạo trong customTemplateStore', () => {
+    // Giả lập lưu mẫu hộp công ty
+    const fefco = getBoxDef('fefco-0201')!;
+    const fPanels = fefco.build({ l: 300, w: 200, h: 150, t: 4, opts: {} });
+    const fLayout = layoutPanels(fPanels);
+    const fDieline = buildDieline(fLayout);
+    const dxfString = generateDxfContent(fDieline);
+    const parsed = parseDxfString(dxfString);
+    const structure = autoDetectStructure(parsed.segments, parsed.bbox);
+
+    const saved = saveCustomTemplate({
+      name: 'Thùng đóng hàng xuất khẩu A1',
+      code: 'CTY-EXP-01',
+      sourceType: 'dxf',
+      rawContent: dxfString,
+      segments: parsed.segments,
+      bbox: parsed.bbox,
+      structure,
+      defaults: { l: 300, w: 200, h: 150 },
+    });
+
+    expect(saved.id).toBeDefined();
+    expect(saved.name).toBe('Thùng đóng hàng xuất khẩu A1');
+
+    const list = getCustomTemplates();
+    expect(list.length).toBeGreaterThan(0);
+    expect(list.some((t) => t.id === saved.id)).toBe(true);
+
+    const found = getCustomTemplateById(saved.id);
+    expect(found).not.toBeNull();
+    expect(found?.code).toBe('CTY-EXP-01');
+
+    // Xoá mẫu
+    deleteCustomTemplate(saved.id);
+    const afterDelete = getCustomTemplates();
+    expect(afterDelete.some((t) => t.id === saved.id)).toBe(false);
+  });
 });
+
