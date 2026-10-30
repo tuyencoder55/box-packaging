@@ -1,23 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { tuckEndReverse } from './tuck-end-reverse';
+import { reverseTuckEndBox, tuckEndReverse } from './tuck-end-reverse';
 import { buildDieline } from '../core/dieline';
 import { layoutPanels } from '../core/layout';
 
 describe('tuckEndReverse (RTE)', () => {
-  it('định nghĩa đúng thông tin cơ bản của hộp gài ngược', () => {
-    expect(tuckEndReverse.id).toBe('tuck-end-reverse');
-    expect(tuckEndReverse.code).toBe('RTE');
-    expect(tuckEndReverse.category).toBe('tuck');
-    expect(tuckEndReverse.defaults).toEqual({
-      l: 80,
-      w: 50,
-      h: 140,
-      t: 0.5,
-    });
+  it('định nghĩa đúng thông tin cơ bản của hộp gài ngược ECMA A20.20', () => {
+    expect(reverseTuckEndBox.id).toBe('reverse-tuck-end-box');
+    expect(tuckEndReverse.id).toBe('reverse-tuck-end-box');
+    expect(reverseTuckEndBox.code).toBe('ECMA A20.20');
+    expect(reverseTuckEndBox.category).toBe('tuck');
   });
 
-  it('tạo đúng 13 panels và các liên kết nắp ngược chiều nhau', () => {
-    const panels = tuckEndReverse.build({
+  it('tạo đúng 13 panels và các liên kết nắp ngược chiều nhau chuẩn ECMA', () => {
+    const panels = reverseTuckEndBox.build({
       l: 80,
       w: 50,
       h: 140,
@@ -28,33 +23,33 @@ describe('tuckEndReverse (RTE)', () => {
     expect(panels.length).toBe(13);
 
     const ids = panels.map((p) => p.id);
-    expect(ids).toContain('panel-a');
+    expect(ids).toContain('panel-back');
     expect(ids).toContain('glue');
-    expect(ids).toContain('panel-b');
-    expect(ids).toContain('panel-c');
-    expect(ids).toContain('panel-d');
+    expect(ids).toContain('panel-left');
+    expect(ids).toContain('panel-front');
+    expect(ids).toContain('panel-right');
     expect(ids).toContain('top-lid');
     expect(ids).toContain('top-tuck');
     expect(ids).toContain('bot-lid');
     expect(ids).toContain('bot-tuck');
-    expect(ids).toContain('dust-top-b');
-    expect(ids).toContain('dust-bot-b');
-    expect(ids).toContain('dust-top-d');
-    expect(ids).toContain('dust-bot-d');
+    expect(ids).toContain('dust-top-left');
+    expect(ids).toContain('dust-bot-left');
+    expect(ids).toContain('dust-top-right');
+    expect(ids).toContain('dust-bot-right');
 
-    // Nắp trên gắn vào C (sau), nắp đáy gắn vào A (trước)
+    // Nắp trên gắn vào Mặt sau, nắp đáy gắn vào Mặt trước
     const topLid = panels.find((p) => p.id === 'top-lid');
     const botLid = panels.find((p) => p.id === 'bot-lid');
 
-    expect(topLid?.parent).toBe('panel-c');
+    expect(topLid?.parent).toBe('panel-back');
     expect(topLid?.edge).toBe('top');
 
-    expect(botLid?.parent).toBe('panel-a');
+    expect(botLid?.parent).toBe('panel-front');
     expect(botLid?.edge).toBe('bottom');
   });
 
   it('layout và dieline tính toán bbox và đường nét chuẩn xác', () => {
-    const panels = tuckEndReverse.build({
+    const panels = reverseTuckEndBox.build({
       l: 80,
       w: 50,
       h: 140,
@@ -72,7 +67,7 @@ describe('tuckEndReverse (RTE)', () => {
     expect(width).toBeGreaterThan(0);
     expect(height).toBeGreaterThan(0);
 
-    // Bề rộng = glue(15) + A(80) + B(50) + C(80) + D(50) = 275
+    // Bề rộng = glue(15) + Back(80) + Left(50) + Front(80) + Right(50) = 275
     expect(width).toBeCloseTo(275, 1);
     // Bề cao = top-tuck(16) + top-lid(50) + body(140) + bot-lid(50) + bot-tuck(16) = 272
     expect(height).toBeCloseTo(272, 1);

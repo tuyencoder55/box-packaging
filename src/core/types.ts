@@ -11,6 +11,7 @@ export interface PanelNode {
   depth: number; // chiều sâu đi ra xa cạnh gắn (mm)
   offset?: number; // dịch dọc cạnh gắn, tính từ đầu cạnh (mặc định 0)
   shape?: Pt[]; // đa giác trong toạ độ cục bộ (u dọc cạnh gắn, v đi ra); mặc định hình chữ nhật len×depth
+  holes?: Pt[][]; // đa giác lỗ cắt bên trong panel (toạ độ cục bộ u, v)
   fold: number; // góc gấp so với cha, độ (+90 = gấp vào trong, ra sau tờ giấy)
   step: number; // thứ tự gấp để chạy animation (1,2,3…)
   label?: string; // "TRƯỚC", "SAU", "NẮP"…
@@ -44,7 +45,12 @@ export interface DimMark {
 export interface BoxDef {
   id: string;
   name: string;
+  nameVi?: string;
   code?: string;
+  summary?: string;
+  description?: string;
+  rangeText?: string;
+  style?: string;
   category: 'carton' | 'tuck' | 'auto-lock' | 'mailer' | 'other';
   defaults: { l: number; w: number; h: number; t: number };
   options: OptionDef[];

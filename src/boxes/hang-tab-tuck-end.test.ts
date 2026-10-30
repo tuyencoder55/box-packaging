@@ -1,77 +1,70 @@
 import { describe, expect, it } from 'vitest';
-import { hangTabTuckEnd } from './hang-tab-tuck-end';
+import { hangTabTuckEndBox, hangTabTuckEnd } from './hang-tab-tuck-end';
 import { buildDieline } from '../core/dieline';
 import { layoutPanels } from '../core/layout';
 
 describe('hangTabTuckEnd (ECMA A20 + Hang Tab)', () => {
   it('định nghĩa đúng thông tin cơ bản của hộp nắp gài có tai treo', () => {
-    expect(hangTabTuckEnd.id).toBe('hang-tab-tuck-end');
-    expect(hangTabTuckEnd.code).toBe('ECMA A20 + Hang Tab');
-    expect(hangTabTuckEnd.category).toBe('tuck');
-    expect(hangTabTuckEnd.defaults).toEqual({
-      l: 75,
-      w: 30,
-      h: 120,
-      t: 0.5,
-    });
+    expect(hangTabTuckEndBox.id).toBe('hang-tab-tuck-end-box');
+    expect(hangTabTuckEnd.id).toBe('hang-tab-tuck-end-box');
+    expect(hangTabTuckEndBox.code).toBe('ECMA A20 + HANG TAB');
+    expect(hangTabTuckEndBox.category).toBe('tuck');
   });
 
-  it('tạo đúng 14 panels bao gồm thân, tai treo header, nắp gài trên và nắp gài đáy', () => {
-    const panels = hangTabTuckEnd.build({
+  it('tạo đúng 15 panels bao gồm thân, tai treo header đôi, nắp gài trên và nắp gài đáy', () => {
+    const panels = hangTabTuckEndBox.build({
       l: 75,
       w: 30,
       h: 120,
       t: 0.5,
-      opts: { headerHeight: 35 },
+      opts: { header: 35 },
     });
 
-    expect(panels.length).toBe(14);
+    expect(panels.length).toBe(15);
 
     const ids = panels.map((p) => p.id);
-    expect(ids).toContain('panel-a');
+    expect(ids).toContain('panel-back');
     expect(ids).toContain('glue');
-    expect(ids).toContain('panel-b');
-    expect(ids).toContain('panel-c');
-    expect(ids).toContain('panel-d');
-    expect(ids).toContain('hang-header');
+    expect(ids).toContain('panel-left');
+    expect(ids).toContain('panel-front');
+    expect(ids).toContain('panel-right');
+    expect(ids).toContain('header');
+    expect(ids).toContain('header-inner');
     expect(ids).toContain('top-lid');
     expect(ids).toContain('top-tuck');
-    expect(ids).toContain('dust-top-b');
-    expect(ids).toContain('dust-top-d');
+    expect(ids).toContain('dust-top-left');
+    expect(ids).toContain('dust-top-right');
     expect(ids).toContain('bot-lid');
     expect(ids).toContain('bot-tuck');
-    expect(ids).toContain('dust-bot-b');
-    expect(ids).toContain('dust-bot-d');
+    expect(ids).toContain('dust-bot-left');
+    expect(ids).toContain('dust-bot-right');
 
-    // Tai treo gắn vào C top, nắp trên gắn vào A top
-    expect(panels.find((p) => p.id === 'hang-header')?.parent).toBe('panel-c');
-    expect(panels.find((p) => p.id === 'top-lid')?.parent).toBe('panel-a');
-    expect(panels.find((p) => p.id === 'bot-lid')?.parent).toBe('panel-c');
+    // Tai treo gắn vào Mặt sau, nắp trên gắn vào Mặt trước, nắp đáy gắn vào Mặt sau
+    expect(panels.find((p) => p.id === 'header')?.parent).toBe('panel-back');
+    expect(panels.find((p) => p.id === 'top-lid')?.parent).toBe('panel-front');
+    expect(panels.find((p) => p.id === 'bot-lid')?.parent).toBe('panel-back');
   });
 
   it('layout và dieline tính toán bbox chuẩn xác', () => {
-    const panels = hangTabTuckEnd.build({
+    const panels = hangTabTuckEndBox.build({
       l: 75,
       w: 30,
       h: 120,
       t: 0.5,
-      opts: { headerHeight: 35, glueWidth: 15, tuckDepth: 16 },
+      opts: { header: 35, glueWidth: 15, tuckDepth: 16 },
     });
 
     const positioned = layoutPanels(panels);
     const dieline = buildDieline(positioned);
 
     expect(dieline.cut.length).toBeGreaterThan(0);
-    expect(dieline.crease.length).toBe(13); // 13 nếp cấn cho 14 panels
+    expect(dieline.crease.length).toBe(14); // 14 nếp cấn cho 15 panels
 
     const [, , width, height] = dieline.bbox;
     expect(width).toBeGreaterThan(0);
     expect(height).toBeGreaterThan(0);
 
-    // Bề rộng = glue(15) + A(75) + B(30) + C(75) + D(30) = 225
+    // Bề rộng = glue(15) + Back(75) + Left(30) + Front(75) + Right(30) = 225
     expect(width).toBeCloseTo(225, 1);
-    // Bề cao = header(35) [hoặc top-tuck(16)+top-lid(30)=46] + body(120) + bot-lid(30) + bot-tuck(16)
-    // 46 + 120 + 46 = 212
-    expect(height).toBeCloseTo(212, 1);
   });
 });

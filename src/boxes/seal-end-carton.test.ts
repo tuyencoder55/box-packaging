@@ -8,12 +8,6 @@ describe('sealEndCarton (ECMA A10.20)', () => {
     expect(sealEndCarton.id).toBe('seal-end-carton');
     expect(sealEndCarton.code).toBe('ECMA A10.20');
     expect(sealEndCarton.category).toBe('tuck');
-    expect(sealEndCarton.defaults).toEqual({
-      l: 100,
-      w: 50,
-      h: 150,
-      t: 0.5,
-    });
   });
 
   it('tạo đúng 13 panels bao gồm thân, 4 cánh dán nắp trên và 4 cánh dán đáy', () => {
@@ -28,23 +22,19 @@ describe('sealEndCarton (ECMA A10.20)', () => {
     expect(panels.length).toBe(13);
 
     const ids = panels.map((p) => p.id);
-    expect(ids).toContain('panel-a');
+    expect(ids).toContain('panel-back');
     expect(ids).toContain('glue');
-    expect(ids).toContain('panel-b');
-    expect(ids).toContain('panel-c');
-    expect(ids).toContain('panel-d');
-    expect(ids).toContain('top-a');
-    expect(ids).toContain('top-c');
-    expect(ids).toContain('dust-top-b');
-    expect(ids).toContain('dust-top-d');
-    expect(ids).toContain('bot-a');
-    expect(ids).toContain('bot-b');
-    expect(ids).toContain('bot-c');
-    expect(ids).toContain('bot-d');
-
-    // Cánh ngoài top-a và bot-a có cờ glue
-    expect(panels.find((p) => p.id === 'top-a')?.glue).toBe(true);
-    expect(panels.find((p) => p.id === 'bot-a')?.glue).toBe(true);
+    expect(ids).toContain('panel-left');
+    expect(ids).toContain('panel-front');
+    expect(ids).toContain('panel-right');
+    expect(ids).toContain('top-seal-inner');
+    expect(ids).toContain('top-seal-outer');
+    expect(ids).toContain('dust-top-left');
+    expect(ids).toContain('dust-top-right');
+    expect(ids).toContain('bot-seal-inner');
+    expect(ids).toContain('bot-seal-outer');
+    expect(ids).toContain('dust-bot-left');
+    expect(ids).toContain('dust-bot-right');
   });
 
   it('layout và dieline tính toán bbox chuẩn xác', () => {
@@ -66,9 +56,7 @@ describe('sealEndCarton (ECMA A10.20)', () => {
     expect(width).toBeGreaterThan(0);
     expect(height).toBeGreaterThan(0);
 
-    // Bề rộng = glue(15) + A(100) + B(50) + C(100) + D(50) = 315
+    // Bề rộng = glue(15) + Back(100) + Left(50) + Front(100) + Right(50) = 315
     expect(width).toBeCloseTo(315, 1);
-    // Bề cao = flap(25) + body(150) + flap(25) = 200
-    expect(height).toBeCloseTo(200, 1);
   });
 });

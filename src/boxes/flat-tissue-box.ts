@@ -1,22 +1,26 @@
-// Định nghĩa loại hộp: Hộp khăn giấy chữ nhật (Rectangular / Flat Tissue Box - Seal End Dispenser)
-import { chamfer, trapezoid } from '../core/shapes';
+// Định nghĩa loại hộp: Hộp khăn giấy chữ nhật (Rectangular Tissue Box - Seal End + Top Dispenser)
+import { buildFoldingCarton } from './cartonTree';
 import type { BoxDef, BoxParams, PanelNode } from '../core/types';
 
 export const flatTissueBox: BoxDef = {
   id: 'flat-tissue-box',
-  name: 'Hộp khăn giấy chữ nhật',
-  code: 'Flat Seal End Dispenser',
+  name: 'Rectangular tissue box dieline',
+  nameVi: 'Hộp khăn giấy chữ nhật',
+  code: 'SEAL END + TOP DISPENSER',
+  style: 'tuck-end-boxes',
   category: 'tuck',
+  summary: 'A long, low glued carton with an oval dispensing opening on the top.',
+  rangeText: 'From 20 × 12 × 25 mm to 500 × 300 × 600 mm',
   defaults: {
-    l: 230,
-    w: 115,
-    h: 70,
+    l: 238,
+    w: 89,
+    h: 119,
     t: 0.5,
   },
   options: [
     {
       key: 'glueWidth',
-      label: 'Rộng lưỡi dán thân (mm)',
+      label: 'Rộng lưỡi dán (mm)',
       type: 'number',
       default: 15,
       min: 10,
@@ -24,175 +28,16 @@ export const flatTissueBox: BoxDef = {
     },
   ],
   dims: [
-    { panelId: 'panel-a', axis: 'u', param: 'l' },
-    { panelId: 'panel-b', axis: 'u', param: 'w' },
-    { panelId: 'panel-a', axis: 'v', param: 'h' },
+    { panelId: 'panel-front', axis: 'u', param: 'l' },
+    { panelId: 'panel-left', axis: 'u', param: 'w' },
+    { panelId: 'panel-front', axis: 'v', param: 'h' },
   ],
 
   build(p: BoxParams): PanelNode[] {
-    const { l, w, h } = p;
-    const g = Number(p.opts?.glueWidth ?? 15);
-    const flapH = Math.round(w * 0.5); // Chiều rộng cánh dán nắp = 1/2 chiều rộng hộp
-
-    const nodes: PanelNode[] = [];
-
-    // 1. Thân hộp chuỗi ngang: Glue -> A (trước) -> B (hông) -> C (sau) -> D (hông)
-    nodes.push({
-      id: 'panel-a',
-      parent: null,
-      len: l,
-      depth: h,
-      fold: 0,
-      step: 0,
-      label: 'Mặt trước (A)',
+    return buildFoldingCarton(p, {
+      top: 'seal',
+      base: 'seal',
+      frontDispenser: 'flat-tissue',
     });
-
-    nodes.push({
-      id: 'glue',
-      parent: 'panel-a',
-      edge: 'left',
-      len: h,
-      depth: g,
-      shape: chamfer(h, g, 3, 3),
-      fold: 90,
-      step: 1,
-      label: 'Lưỡi dán',
-      glue: true,
-    });
-
-    nodes.push({
-      id: 'panel-b',
-      parent: 'panel-a',
-      edge: 'right',
-      len: h,
-      depth: w,
-      fold: 90,
-      step: 1,
-      label: 'Mặt hông (B)',
-    });
-
-    nodes.push({
-      id: 'panel-c',
-      parent: 'panel-b',
-      edge: 'right',
-      len: h,
-      depth: l,
-      fold: 90,
-      step: 1,
-      label: 'Mặt sau (C)',
-    });
-
-    nodes.push({
-      id: 'panel-d',
-      parent: 'panel-c',
-      edge: 'right',
-      len: h,
-      depth: w,
-      fold: 90,
-      step: 1,
-      label: 'Mặt hông (D)',
-    });
-
-    // 2. Nắp trên dán keo (Top Seal End)
-    nodes.push({
-      id: 'dust-top-b',
-      parent: 'panel-b',
-      edge: 'top',
-      len: w,
-      depth: flapH,
-      shape: trapezoid(w, flapH, 3, 3),
-      fold: 90,
-      step: 2,
-      label: 'Tai bụi trên B',
-    });
-
-    nodes.push({
-      id: 'dust-top-d',
-      parent: 'panel-d',
-      edge: 'top',
-      len: w,
-      depth: flapH,
-      shape: trapezoid(w, flapH, 3, 3),
-      fold: 90,
-      step: 2,
-      label: 'Tai bụi trên D',
-    });
-
-    nodes.push({
-      id: 'top-c',
-      parent: 'panel-c',
-      edge: 'top',
-      len: l,
-      depth: flapH,
-      shape: chamfer(l, flapH, 2, 2),
-      fold: 90,
-      step: 2,
-      label: 'Cánh nắp trên sau (C)',
-    });
-
-    nodes.push({
-      id: 'top-a',
-      parent: 'panel-a',
-      edge: 'top',
-      len: l,
-      depth: flapH,
-      shape: chamfer(l, flapH, 2, 2),
-      fold: 90,
-      step: 2,
-      label: 'Cánh nắp trên trước (A)',
-      glue: true,
-    });
-
-    // 3. Đáy dán keo (Bottom Seal End)
-    nodes.push({
-      id: 'bot-b',
-      parent: 'panel-b',
-      edge: 'bottom',
-      len: w,
-      depth: flapH,
-      shape: trapezoid(w, flapH, 3, 3),
-      fold: 90,
-      step: 2,
-      label: 'Tai bụi dưới B',
-    });
-
-    nodes.push({
-      id: 'bot-d',
-      parent: 'panel-d',
-      edge: 'bottom',
-      len: w,
-      depth: flapH,
-      shape: trapezoid(w, flapH, 3, 3),
-      fold: 90,
-      step: 2,
-      label: 'Tai bụi dưới D',
-    });
-
-    nodes.push({
-      id: 'bot-c',
-      parent: 'panel-c',
-      edge: 'bottom',
-      len: l,
-      depth: flapH,
-      shape: chamfer(l, flapH, 2, 2),
-      fold: 90,
-      step: 2,
-      label: 'Cánh đáy sau (C)',
-    });
-
-    nodes.push({
-      id: 'bot-a',
-      parent: 'panel-a',
-      edge: 'bottom',
-      len: l,
-      depth: flapH,
-      shape: chamfer(l, flapH, 2, 2),
-      fold: 90,
-      step: 2,
-      label: 'Cánh đáy trước (A)',
-      glue: true,
-    });
-
-    return nodes;
   },
 };

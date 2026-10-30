@@ -5,6 +5,7 @@ import type { PanelNode, Pt, Seg } from './types';
 export interface LayoutPanel {
   node: PanelNode;
   poly: Pt[]; // Đa giác trong toạ độ phẳng (mm)
+  holes?: Pt[][]; // Đa giác các lỗ cắt trong toạ độ phẳng (mm)
   rect: [number, number, number, number]; // [x, y, w, h] hình chữ nhật bao trong toạ độ phẳng
   baseSeg: Seg | null; // Đoạn cạnh gắn chung với cha (đường cấn)
 }
@@ -39,6 +40,7 @@ export function layoutPanels(nodes: PanelNode[]): LayoutPanel[] {
     const rootLayout: LayoutPanel = {
       node: rootNode,
       poly: rootShape.map(([u, v]) => [startX + u, startY + v]),
+      holes: rootNode.holes?.map((hole) => hole.map(([u, v]) => [startX + u, startY + v])),
       rect: [startX, startY, rootNode.len, rootNode.depth],
       baseSeg: null,
     };
@@ -100,6 +102,7 @@ export function layoutPanels(nodes: PanelNode[]): LayoutPanel[] {
         const childLayout: LayoutPanel = {
           node: child,
           poly: localShape.map(([u, v]) => transform(u, v)),
+          holes: child.holes?.map((hole) => hole.map(([u, v]) => transform(u, v))),
           rect: childRect,
           baseSeg,
         };

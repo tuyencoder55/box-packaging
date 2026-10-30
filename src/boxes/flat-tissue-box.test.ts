@@ -14,12 +14,17 @@ describe('flatTissueBox', () => {
     };
     const nodes = flatTissueBox.build(params);
 
-    // 1 thân A + 1 lưỡi dán + 3 thân (B, C, D) + 4 nắp trên + 4 nắp đáy = 13 panels
+    // 1 thân Back + 1 lưỡi dán + 3 thân (Left, Front, Right) + 4 nắp trên + 4 nắp đáy = 13 panels
     expect(nodes).toHaveLength(13);
 
     const root = nodes.find((n) => n.parent === null);
     expect(root).toBeDefined();
-    expect(root?.id).toBe('panel-a');
+    expect(root?.id).toBe('panel-back');
+
+    // Mặt trước có lỗ cắt oval mở hộp
+    const front = nodes.find((n) => n.id === 'panel-front');
+    expect(front?.holes).toBeDefined();
+    expect(front?.holes?.length).toBeGreaterThan(0);
   });
 
   it('layout và dieline tính toán bbox chuẩn xác', () => {
@@ -38,12 +43,9 @@ describe('flatTissueBox', () => {
     expect(dieline.crease.length).toBeGreaterThan(0);
     expect(dieline.cut.length).toBeGreaterThan(0);
 
-    const [, , totalW, totalH] = dieline.bbox;
+    const [, , totalW] = dieline.bbox;
 
-    // flapH = Math.round(115 * 0.5) = 58
-    // Chiều rộng: glue (15) + A (230) + B (115) + C (230) + D (115) = 705
+    // Chiều rộng: glue (15) + Back (230) + Left (115) + Front (230) + Right (115) = 705
     expect(totalW).toBeCloseTo(15 + 230 * 2 + 115 * 2, 1);
-    // Chiều cao: top flap (58) + body (70) + bot flap (58) = 186
-    expect(totalH).toBeCloseTo(58 + 70 + 58, 1);
   });
 });

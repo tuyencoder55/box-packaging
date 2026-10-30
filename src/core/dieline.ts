@@ -132,6 +132,19 @@ export function buildDieline(layouts: LayoutPanel[]): Dieline {
         }
       }
     }
+
+    // Bổ sung các đoạn cắt từ lỗ cắt kín bên trong panel (holes)
+    if (layout.holes) {
+      for (const hole of layout.holes) {
+        const m = hole.length;
+        for (let i = 0; i < m; i++) {
+          rawCuts.push({
+            a: hole[i],
+            b: hole[(i + 1) % m],
+          });
+        }
+      }
+    }
   }
 
   // Khử trùng lặp các đoạn cắt

@@ -14,12 +14,17 @@ describe('dispenserBox', () => {
     };
     const nodes = dispenserBox.build(params);
 
-    // 1 thân A + 1 lưỡi dán + 3 thân (B, C, D) + 4 nắp trên (lid, tuck, 2 dust) + 4 nắp đáy (lid, tuck, 2 dust) = 13 panels
+    // 1 thân Back + 1 lưỡi dán + 3 thân (Left, Front, Right) + 4 nắp trên (lid, tuck, 2 dust) + 4 nắp đáy (lid, tuck, 2 dust) = 13 panels
     expect(nodes).toHaveLength(13);
 
     const root = nodes.find((n) => n.parent === null);
     expect(root).toBeDefined();
-    expect(root?.id).toBe('panel-a');
+    expect(root?.id).toBe('panel-back');
+
+    // Mặt trước có lỗ cắt oval mở hộp
+    const front = nodes.find((n) => n.id === 'panel-front');
+    expect(front?.holes).toBeDefined();
+    expect(front?.holes?.length).toBeGreaterThan(0);
   });
 
   it('layout và dieline tính toán bbox chuẩn xác', () => {
@@ -40,7 +45,7 @@ describe('dispenserBox', () => {
 
     const [, , totalW, totalH] = dieline.bbox;
 
-    // Chiều rộng: glue (15) + A (150) + B (75) + C (150) + D (75) = 465
+    // Chiều rộng: glue (15) + Back (150) + Left (75) + Front (150) + Right (75) = 465
     expect(totalW).toBeCloseTo(15 + 150 * 2 + 75 * 2, 1);
     // Chiều cao: top lid+tuck (75 + 16) + body (100) + bot lid+tuck (75 + 16) = 282
     expect(totalH).toBeCloseTo(100 + (75 + 16) * 2, 1);

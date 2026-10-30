@@ -103,3 +103,70 @@ export function rounded(
   return pts;
 }
 
+/**
+ * Đa giác elip / oval: tâm (cx, cy), bán kính bán trục (rx, ry)
+ */
+export function oval(
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  segments = 36
+): Pt[] {
+  const pts: Pt[] = [];
+  for (let i = 0; i < segments; i++) {
+    const angle = (i / segments) * Math.PI * 2;
+    pts.push([
+      Math.round((cx + rx * Math.cos(angle)) * 1000) / 1000,
+      Math.round((cy + ry * Math.sin(angle)) * 1000) / 1000,
+    ]);
+  }
+  return pts;
+}
+
+/**
+ * Đa giác rãnh nhộng / Euro slot: góc trên-trái (x, y), rộng w, cao h, bo tròn 2 đầu bán kính r = h/2
+ */
+export function capsule(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  segments = 8
+): Pt[] {
+  const r = Math.min(h / 2, w / 2);
+  const pts: Pt[] = [];
+
+  // Cạnh trên từ trái qua phải
+  pts.push([x + r, y]);
+  pts.push([x + w - r, y]);
+
+  // Bo tròn nửa cung bên phải (-90° đến +90°)
+  const rcx = x + w - r;
+  const rcy = y + r;
+  for (let i = 0; i <= segments; i++) {
+    const a = -Math.PI / 2 + (Math.PI * i) / segments;
+    pts.push([
+      Math.round((rcx + r * Math.cos(a)) * 1000) / 1000,
+      Math.round((rcy + r * Math.sin(a)) * 1000) / 1000,
+    ]);
+  }
+
+  // Cạnh dưới từ phải qua trái
+  pts.push([x + r, y + h]);
+
+  // Bo tròn nửa cung bên trái (+90° đến +270°)
+  const lcx = x + r;
+  const lcy = y + r;
+  for (let i = 0; i <= segments; i++) {
+    const a = Math.PI / 2 + (Math.PI * i) / segments;
+    pts.push([
+      Math.round((lcx + r * Math.cos(a)) * 1000) / 1000,
+      Math.round((lcy + r * Math.sin(a)) * 1000) / 1000,
+    ]);
+  }
+
+  return pts;
+}
+
+

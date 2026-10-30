@@ -99,7 +99,7 @@ function createEdgeTextureManager() {
  * Chuyển đổi đa giác phẳng 2D (tọa độ khuôn) thành THREE.Shape
  * Lưu ý: hệ tọa độ 3D có Y hướng lên trên nên Three.Y = -Flat.Y
  */
-function createPanelShape(poly: Pt[], originX: number, originY: number): THREE.Shape {
+function createPanelShape(poly: Pt[], originX: number, originY: number, holes?: Pt[][]): THREE.Shape {
   const shape = new THREE.Shape();
   if (poly.length === 0) return shape;
 
@@ -115,6 +115,25 @@ function createPanelShape(poly: Pt[], originX: number, originY: number): THREE.S
   }
 
   shape.closePath();
+
+  // Đục các lỗ cắt kín
+  if (holes && holes.length > 0) {
+    for (const hole of holes) {
+      if (hole.length < 3) continue;
+      const holePath = new THREE.Path();
+      const h0x = hole[0][0] - originX;
+      const h0y = -(hole[0][1] - originY);
+      holePath.moveTo(h0x, h0y);
+      for (let j = 1; j < hole.length; j++) {
+        const hx = hole[j][0] - originX;
+        const hy = -(hole[j][1] - originY);
+        holePath.lineTo(hx, hy);
+      }
+      holePath.closePath();
+      shape.holes.push(holePath);
+    }
+  }
+
   return shape;
 }
 
@@ -211,7 +230,7 @@ export function buildFoldModel(panels: LayoutPanel[], options?: FoldModelOptions
   // 3. Dựng hình học 3D có độ dày & vân sóng carton trên các cạnh
   panels.forEach((p) => {
     const origin = hingeOrigins.get(p.node.id) ?? [0, 0];
-    const shape = createPanelShape(p.poly, origin[0], origin[1]);
+    const shape = createPanelShape(p.poly, origin[0], origin[1], p.holes);
     const geo = new THREE.ExtrudeGeometry(shape, {
       depth: panelThickness,
       bevelEnabled: false,

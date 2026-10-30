@@ -1,6 +1,6 @@
 // Kiểm thử hàm tạo hình học trong src/core/shapes.ts
 import { describe, expect, it } from 'vitest';
-import { chamfer, rect, rounded, trapezoid } from './shapes';
+import { capsule, chamfer, oval, rect, rounded, trapezoid } from './shapes';
 
 describe('shapes', () => {
   it('rect tạo đúng 4 điểm chữ nhật len × depth', () => {
@@ -53,5 +53,20 @@ describe('shapes', () => {
     expect(Math.round(poly[2][0])).toBe(100);
     expect(Math.round(poly[2][1])).toBe(40);
   });
+
+  it('oval tạo đa giác elip kín với bán kính chính xác', () => {
+    const pts = oval(50, 50, 20, 10, 16);
+    expect(pts.length).toBe(16);
+    expect(pts[0][0]).toBe(70);
+    expect(pts[0][1]).toBe(50);
+  });
+
+  it('capsule tạo rãnh nhộng / Euro slot chuẩn', () => {
+    const pts = capsule(10, 20, 40, 10, 4);
+    expect(pts.length).toBeGreaterThan(10);
+    // Bắt đầu tại [x + r, y] = [15, 20]
+    expect(pts[0]).toEqual([15, 20]);
+  });
 });
+
 

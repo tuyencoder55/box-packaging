@@ -35,26 +35,26 @@ Quy tắc: bộ phận là hàm thuần `(args) => PanelNode[]`, gắn vào pane
 
 ## Mẫu cụ thể (điền từ ảnh người dùng gửi)
 
-| Mã nội bộ (id) | Tên hiển thị | Nhóm | Kích thước mặc định L×W×H (mm) | Ảnh tham chiếu (docs/ref/…) | Trạng thái |
+| Mã nội bộ (id) | Tên hiển thị | Tiêu chuẩn / Mã | Kích thước mặc định L×W×H (mm) | Ghi chú & Lỗ cắt | Trạng thái |
 |---|---|---|---|---|---|
-| fefco-0201 | Thùng carton RSC | 1 | 300×200×150 | — | ✅ |
-| fefco-0203 | Thùng carton nắp chồng FOL | 1 | 300×200×200 | — | ✅ |
-| fefco-0301 | Hộp âm dương (nắp đáy rời) | 1 | 200×150×80 | — | ✅ |
-| fefco-0427 | Mailer cuộn mép | 4 | 200×150×50 | — | ✅ |
-| tuck-end-straight | Hộp nắp gài thẳng | 2 | 80×50×140 | — | ✅ |
-| tuck-end-reverse | Hộp nắp gài ngược | 2 | 80×50×140 | — | ✅ |
-| auto-lock-bottom | Hộp đáy khoá tự động | 3 | 80×50×140 | docs/ref/studio-pacvina.png | ✅ |
-| snap-lock-bottom | Hộp đáy khoá cài 1-2-3 | 2 | 80×60×140 | Packfino ECMA A50.20 | ✅ |
-| hang-tab-tuck-end | Hộp nắp gài có tai treo | 2 | 75×30×120 | Packfino ECMA A20 | ✅ |
-| snap-lock-hang-tab | Hộp tai treo đáy khoá cài 1-2-3 | 2 | 75×40×120 | Packfino ECMA A50 | ✅ |
-| crash-lock-hang-tab | Hộp tai treo đáy khoá tự động | 3 | 75×40×120 | Packfino ECMA A60 | ✅ |
-| tuck-top-glued-bottom | Hộp nắp gài trên đáy dán keo | 2 | 80×50×140 | Packfino ECMA A20/A10 | ✅ |
-| seal-end-carton | Hộp dán keo hai đầu | 2 | 100×50×150 | Packfino ECMA A10.20 | ✅ |
-| cube-tissue-box | Hộp khăn giấy vuông | 2 | 112×112×132 | Packfino Seal End Dispenser | ✅ |
-| flat-tissue-box | Hộp khăn giấy chữ nhật | 2 | 230×115×70 | Packfino Flat Seal End Dispenser | ✅ |
-| dispenser-box | Hộp chia sản phẩm (Dispenser) | 2 | 150×75×100 | Packfino ECMA A20.20 + Dispenser | ✅ |
-| tea-bag-box | Hộp đựng gói trà | 2 | 140×70×76 | Packfino ECMA A20/A10 | ✅ |
-| window-tuck-end | Hộp nắp gài có cửa sổ | 2 | 100×50×150 | Packfino ECMA A20.20 + Window | ✅ |
+| reverse-tuck-end-box | Reverse tuck end box dieline | ECMA A20.20 | 63.5×38.1×127 | Nắp gài đối xứng | ✅ |
+| straight-tuck-end-box | Straight tuck end box dieline | ECMA A20.20.03 | 76.2×76.2×101.6 | Nắp gài cùng phía mặt sau | ✅ |
+| hang-tab-tuck-end-box | Hang tab tuck end box dieline | ECMA A20 + HANG TAB | 76.2×25.4×127 | Tai treo thẻ header + lỗ Euro slot | ✅ |
+| auto-lock-bottom-box | Auto lock bottom box dieline | ECMA A60.20 | 76.2×76.2×127 | Đáy khoá tự động dán sẵn (Crash lock) | ✅ |
+| snap-lock-bottom-box | Snap lock bottom box dieline | ECMA A50.20 / FEFCO 0215 | 101.6×76.2×152.4 | Đáy khoá gài 1-2-3 có rãnh & lưỡi | ✅ |
+| seal-end-carton | Seal end carton dieline | ECMA A10.20 | 101.6×50.8×152.4 | Nắp và đáy dán keo niêm phong | ✅ |
+| tissue-box | Cube tissue box dieline | SEAL END + DISPENSER | 111.8×111.8×132.1 | Hộp khăn giấy vuông, lỗ oval trên nắp | ✅ |
+| tuck-top-glued-bottom-box | Tuck top glued bottom box dieline | ECMA A20 / A10 COMBINATION | 88.9×50.8×139.7 | Nắp gài trên, đáy dán keo | ✅ |
+| dispenser-box | Dispenser box dieline | ECMA A20.20 + DISPENSER | 152.4×76.2×101.6 | Hộp rút sản phẩm, lỗ oval mặt trước | ✅ |
+| tea-box | Tea bag box dieline | TUCK TOP, GLUED BOTTOM | 139.7×69.9×76.2 | Hộp trà 20 gói nắp gài đáy dán | ✅ |
+| flat-tissue-box | Rectangular tissue box dieline | SEAL END + TOP DISPENSER | 238×89×119 | Hộp khăn giấy chữ nhật, lỗ oval mặt trước | ✅ |
+| snap-lock-hang-tab-box | Hang tab box with snap lock bottom dieline | ECMA A50 + HANG TAB | 76.2×25.4×127 | Tai treo Euro slot + đáy gài 1-2-3 | ✅ |
+| crash-lock-hang-tab-box | Hang tab box with auto lock bottom dieline | ECMA A60 + HANG TAB | 76.2×25.4×127 | Tai treo Euro slot + đáy khoá tự động | ✅ |
+| fefco-0201 | Thùng carton RSC | FEFCO 0201 | 300×200×150 | Thùng đối khẩu thông dụng | ✅ |
+| fefco-0203 | Thùng carton nắp chồng FOL | FEFCO 0203 | 300×200×200 | Nắp chồng phủ kín | ✅ |
+| fefco-0301 | Hộp âm dương (nắp đáy rời) | FEFCO 0301 | 200×150×80 | Hộp 2 mảnh nắp đáy rời | ✅ |
+| fefco-0427 | Mailer cuộn mép | FEFCO 0427 | 200×150×50 | Hộp ship hàng cuộn mép | ✅ |
+| window-tuck-end | Hộp nắp gài có cửa sổ | ECMA A20.20 + Window | 100×50×150 | Cửa sổ kính bóng kính mặt trước | ✅ |
 
 (Thêm dòng mới ở cuối bảng khi người dùng cung cấp mẫu.)
 
