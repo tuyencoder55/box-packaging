@@ -863,6 +863,14 @@ export function openImporterModal(
   actionSection.querySelector('#btn-open-studio')?.addEventListener('click', () => {
     if (!currentRescaledDieline || !currentImported) return;
 
+    const importedObj = {
+      name: currentImported.name,
+      sourceType: currentImported.sourceType,
+      segments: currentImported.segments,
+      bbox: currentImported.bbox,
+      structure: currentImported.structure,
+    };
+
     // Lưu vào sessionStorage để Studio mở ngay lập tức kèm cấu trúc để hiển thị kích thước
     sessionStorage.setItem(
       'boxmaker:imported_dieline',
@@ -873,6 +881,7 @@ export function openImporterModal(
         l: targetL,
         w: targetW,
         h: targetH,
+        rawImported: importedObj,
       })
     );
 

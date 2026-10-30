@@ -5,12 +5,22 @@ import {
   getCustomTemplates,
   type CustomTemplate,
 } from '../importer/customTemplateStore';
+import { rescaleDieline } from '../importer/parametricScaler';
+import type { ImportedDieline } from '../importer/types';
 import { openImporterModal } from '../ui/importer/importerModal';
 import { renderCardGrid } from '../ui/templates/cardGrid';
 import { createFilterBar } from '../ui/templates/filterBar';
 
 function generateCustomThumbnailSvg(tmpl: CustomTemplate): SVGSVGElement {
-  const [minX, minY, width, height] = tmpl.bbox;
+  const importedObj: ImportedDieline = {
+    name: tmpl.name,
+    sourceType: tmpl.sourceType,
+    segments: tmpl.segments,
+    bbox: tmpl.bbox,
+    structure: tmpl.structure,
+  };
+  const rescaled = rescaleDieline(importedObj, tmpl.defaults.l, tmpl.defaults.w, tmpl.defaults.h);
+  const [minX, minY, width, height] = rescaled.bbox;
   const padding = Math.max(width, height) * 0.08;
   const vbX = minX - padding;
   const vbY = minY - padding;
@@ -25,12 +35,11 @@ function generateCustomThumbnailSvg(tmpl: CustomTemplate): SVGSVGElement {
 
   let cutD = '';
   let creaseD = '';
-  for (const seg of tmpl.segments) {
-    if (seg.type === 'cut') {
-      cutD += `M ${seg.a[0]} ${seg.a[1]} L ${seg.b[0]} ${seg.b[1]} `;
-    } else {
-      creaseD += `M ${seg.a[0]} ${seg.a[1]} L ${seg.b[0]} ${seg.b[1]} `;
-    }
+  for (const seg of rescaled.cut) {
+    cutD += `M ${seg.a[0]} ${seg.a[1]} L ${seg.b[0]} ${seg.b[1]} `;
+  }
+  for (const seg of rescaled.crease) {
+    creaseD += `M ${seg.a[0]} ${seg.a[1]} L ${seg.b[0]} ${seg.b[1]} `;
   }
 
   const strokeW = Math.max(0.6, Math.max(vbW, vbH) * 0.005);
@@ -196,10 +205,25 @@ function renderCustomGrid(container: HTMLElement, onReload: () => void) {
     const specs = document.createElement('div');
     specs.style.cssText = 'font-size: 12.5px; color: #64748b; line-height: 1.5; margin-bottom: 16px;';
     const boxTypeStr = tmpl.structure.isRSCFlap ? 'Thùng carton A1 / RSC' : 'Hộp gài folding carton';
+    const isCustomized =
+      tmpl.defaults.l !== tmpl.structure.l0 ||
+      tmpl.defaults.w !== tmpl.structure.w0 ||
+      tmpl.defaults.h !== tmpl.structure.h0;
+
+    const blankW = Math.round(tmpl.structure.glueWidth + 2 * tmpl.defaults.l + 2 * tmpl.defaults.w);
+    const flapH = tmpl.structure.isRSCFlap
+      ? tmpl.defaults.w / 2
+      : (tmpl.structure.yTop - tmpl.structure.minY);
+    const botFlapH = tmpl.structure.isRSCFlap
+      ? tmpl.defaults.w / 2
+      : (tmpl.structure.maxY - tmpl.structure.yBottom);
+    const blankH = Math.round(flapH + tmpl.defaults.h + botFlapH);
+
     specs.innerHTML = `
       <div>Loại: <b>${boxTypeStr}</b></div>
-      <div>Kích thước gốc: <b>${tmpl.defaults.l} × ${tmpl.defaults.w} × ${tmpl.defaults.h} mm</b></div>
-      <div>Khổ phôi: <b>${Math.round(tmpl.bbox[2])} × ${Math.round(tmpl.bbox[3])} mm</b> | Lưỡi: <b>${tmpl.structure.glueWidth}mm</b></div>
+      <div>Kích thước gốc: <b>${tmpl.structure.l0} × ${tmpl.structure.w0} × ${tmpl.structure.h0} mm</b></div>
+      ${isCustomized ? `<div style="color: #059669; font-weight: 600;">Đã co giãn: <b>${tmpl.defaults.l} × ${tmpl.defaults.w} × ${tmpl.defaults.h} mm</b></div>` : ''}
+      <div>Khổ phôi: <b>${blankW} × ${blankH} mm</b> | Lưỡi: <b>${tmpl.structure.glueWidth}mm</b></div>
     `;
 
     const actions = document.createElement('div');
@@ -238,19 +262,26 @@ function renderCustomGrid(container: HTMLElement, onReload: () => void) {
     });
 
     actions.querySelector('.btn-studio')?.addEventListener('click', () => {
-      const cuts = tmpl.segments.filter((s) => s.type === 'cut').map((s) => ({ a: s.a, b: s.b }));
-      const creases = tmpl.segments.filter((s) => s.type === 'crease').map((s) => ({ a: s.a, b: s.b }));
-      const dieline = { cut: cuts, crease: creases, bbox: tmpl.bbox };
+      const importedObj: ImportedDieline = {
+        name: tmpl.name,
+        sourceType: tmpl.sourceType,
+        segments: tmpl.segments,
+        bbox: tmpl.bbox,
+        structure: tmpl.structure,
+      };
+      // Co giãn dieline về chính xác kích thước đã lưu để dieline khớp 100% với DIM
+      const rescaled = rescaleDieline(importedObj, tmpl.defaults.l, tmpl.defaults.w, tmpl.defaults.h);
 
       sessionStorage.setItem(
         'boxmaker:imported_dieline',
         JSON.stringify({
           name: tmpl.name,
-          dieline,
+          dieline: rescaled,
           structure: tmpl.structure,
           l: tmpl.defaults.l,
           w: tmpl.defaults.w,
           h: tmpl.defaults.h,
+          rawImported: importedObj,
         })
       );
       window.location.href = '/app.html?imported=true';

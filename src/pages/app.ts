@@ -15,11 +15,24 @@ import { initParamPanel, type AppDocState } from '../ui/app/paramPanel';
 import { createStepBar, type StepId } from '../ui/app/stepBar';
 import { generateImportedDimensions } from '../importer/dimensionGenerator';
 import { openImporterModal } from '../ui/importer/importerModal';
+import { rescaleDieline } from '../importer/parametricScaler';
+import type { ImportedDieline } from '../importer/types';
 
 // Điểm vào trang Studio: kết nối thanh tham số, khung 2D, mockup 3D và xuất file
 function initStudio() {
   const params = new URLSearchParams(window.location.search);
   const type = params.get('type') ?? 'fefco-0201';
+  const isImported = params.get('imported') === 'true';
+
+  let importedData: any = null;
+  if (isImported) {
+    try {
+      const raw = sessionStorage.getItem('boxmaker:imported_dieline');
+      if (raw) importedData = JSON.parse(raw);
+    } catch (e) {
+      console.warn('Lỗi đọc imported_dieline:', e);
+    }
+  }
 
   const targetBox = getBoxDef(type) ?? getBoxDef('fefco-0201');
   if (!targetBox) {
@@ -44,9 +57,9 @@ function initStudio() {
     boxId: boxDef.id,
     unit: (params.get('unit') as AppDocState['unit']) ?? (isDifferentBox ? 'mm' : saved.unit) ?? 'mm',
     sizeType: (params.get('sizeType') as 'inner' | 'outer') ?? (isDifferentBox ? 'inner' : saved.sizeType) ?? 'inner',
-    l: Number(params.get('l')) || (isDifferentBox ? boxDef.defaults.l : saved.l) || boxDef.defaults.l,
-    w: Number(params.get('w')) || (isDifferentBox ? boxDef.defaults.w : saved.w) || boxDef.defaults.w,
-    h: Number(params.get('h')) || (isDifferentBox ? boxDef.defaults.h : saved.h) || boxDef.defaults.h,
+    l: importedData?.l ?? (Number(params.get('l')) || (isDifferentBox ? boxDef.defaults.l : saved.l) || boxDef.defaults.l),
+    w: importedData?.w ?? (Number(params.get('w')) || (isDifferentBox ? boxDef.defaults.w : saved.w) || boxDef.defaults.w),
+    h: importedData?.h ?? (Number(params.get('h')) || (isDifferentBox ? boxDef.defaults.h : saved.h) || boxDef.defaults.h),
     t: Number(params.get('t')) || (isDifferentBox ? boxDef.defaults.t : saved.t) || boxDef.defaults.t,
     compensate: isDifferentBox ? false : (saved.compensate ?? false),
     opts: isDifferentBox ? {} : (saved.opts ?? {}),
@@ -113,16 +126,27 @@ function initStudio() {
     `;
 
     const allBoxes = getAllBoxes();
+    if (importedData) {
+      const opt = document.createElement('option');
+      opt.value = 'imported';
+      opt.textContent = `📁 ${importedData.name} (Mẫu đã nhập)`;
+      opt.selected = true;
+      select.appendChild(opt);
+    }
     allBoxes.forEach((b) => {
       const opt = document.createElement('option');
       opt.value = b.id;
       opt.textContent = `${b.name} (${b.code ?? b.id})`;
-      if (b.id === boxDef.id) opt.selected = true;
+      if (!importedData && b.id === boxDef.id) opt.selected = true;
       select.appendChild(opt);
     });
 
     select.addEventListener('change', () => {
-      window.location.search = `?type=${encodeURIComponent(select.value)}`;
+      if (select.value === 'imported') {
+        window.location.search = '?imported=true';
+      } else {
+        window.location.search = `?type=${encodeURIComponent(select.value)}`;
+      }
     });
 
     metaSpan = document.createElement('span');
@@ -297,7 +321,21 @@ function initStudio() {
   });
   btnImport.addEventListener('click', () => {
     openImporterModal((rescaledDieline, l, w, h, name) => {
-      loadImportedDieline(rescaledDieline, l, w, h, name);
+      const raw = sessionStorage.getItem('boxmaker:imported_dieline');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        loadImportedDieline(
+          parsed.dieline,
+          parsed.l,
+          parsed.w,
+          parsed.h,
+          parsed.name,
+          parsed.structure,
+          parsed.rawImported
+        );
+      } else {
+        loadImportedDieline(rescaledDieline, l, w, h, name);
+      }
     });
   });
 
@@ -306,7 +344,8 @@ function initStudio() {
   }
 
   let zoomController: ZoomPanController | null = null;
-  let isCustomImported = false;
+  let isCustomImported = Boolean(importedData);
+  let importedContext: ImportedDieline | null = importedData?.rawImported ?? null;
 
   function loadImportedDieline(
     dieline: Dieline,
@@ -314,10 +353,14 @@ function initStudio() {
     w: number,
     h: number,
     name: string,
-    structure?: any
+    structure?: any,
+    rawImported?: any
   ) {
     isCustomImported = true;
     currentDieline = dieline;
+    if (rawImported) {
+      importedContext = rawImported;
+    }
 
     if (structure) {
       currentDimLines = generateImportedDimensions(structure, l, w, h, dieline.bbox);
@@ -352,10 +395,40 @@ function initStudio() {
       });
       setupZoomPan(viewport, svg);
     }
+
+    store.set({ l, w, h });
   }
 
   function updateDielineView(s: AppDocState) {
-    if (isCustomImported) return;
+    if (isCustomImported && importedContext) {
+      const rescaled = rescaleDieline(importedContext, s.l, s.w, s.h);
+      currentDieline = rescaled;
+      currentDimLines = generateImportedDimensions(importedContext.structure, s.l, s.w, s.h, rescaled.bbox);
+
+      if (metaSpan) {
+        metaSpan.innerHTML = `— <b style="color:var(--color-primary);">${importedContext.name}</b> (${s.l}×${s.w}×${s.h} mm)`;
+      }
+
+      if (viewport) {
+        const svg = renderSvgView(viewport, rescaled, currentDimLines, {
+          cutColor: s.cutColor,
+          creaseColor: s.creaseColor,
+          dimColor: s.dimColor,
+          dimFont: s.dimFont,
+          dimFontSize: s.dimFontSize,
+        });
+        if (!zoomController) {
+          zoomController = setupZoomPan(viewport, svg);
+        }
+      }
+
+      mockupController?.updateModel(s, boxDef);
+      return;
+    }
+
+    if (isCustomImported && !importedContext) {
+      return;
+    }
 
     if (metaSpan) {
       const mode = s.sizeType === 'outer' ? 'phủ bì' : 'lòng';
@@ -388,18 +461,16 @@ function initStudio() {
     mockupController?.updateModel(s, boxDef);
   }
 
-  if (params.get('imported') === 'true') {
-    try {
-      const rawImported = sessionStorage.getItem('boxmaker:imported_dieline');
-      if (rawImported) {
-        const parsed = JSON.parse(rawImported);
-        loadImportedDieline(parsed.dieline, parsed.l, parsed.w, parsed.h, parsed.name, parsed.structure);
-      } else {
-        updateDielineView(store.get());
-      }
-    } catch {
-      updateDielineView(store.get());
-    }
+  if (isImported && importedData) {
+    loadImportedDieline(
+      importedData.dieline,
+      importedData.l,
+      importedData.w,
+      importedData.h,
+      importedData.name,
+      importedData.structure,
+      importedData.rawImported
+    );
   } else {
     updateDielineView(store.get());
   }
@@ -407,7 +478,6 @@ function initStudio() {
   store.subscribe(
     (s) => s,
     (s) => {
-      isCustomImported = false;
       updateDielineView(s);
     }
   );

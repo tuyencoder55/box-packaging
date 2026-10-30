@@ -173,6 +173,36 @@ describe('Smart DXF & SVG Importer + Parametric Resizer', () => {
     expect(labels).toContain('350');
   });
 
+  it('tạo chuỗi DIM chuẩn xác khi co giãn (L=300, W=300, H=285) không bị đè nhãn hoặc lệch cột', () => {
+    const fefco = getBoxDef('fefco-0201')!;
+    const fPanels = fefco.build({ l: 300, w: 200, h: 150, t: 4, opts: {} });
+    const fLayout = layoutPanels(fPanels);
+    const fDieline = buildDieline(fLayout);
+    const dxfString = generateDxfContent(fDieline);
+    const parsed = parseDxfString(dxfString);
+    const structure = autoDetectStructure(parsed.segments, parsed.bbox);
+
+    const dims = generateImportedDimensions(structure, 300, 300, 285, parsed.bbox);
+    const labels = dims.map((d) => d.label).filter(Boolean);
+
+    // Kiểm tra các nhãn của kích thước mới
+    expect(labels).toContain('35'); // lưỡi dán
+    expect(labels).toContain('300'); // 4 panel thân đều là 300
+    expect(labels).toContain('1235'); // tổng ngang: 35 + 300*4 = 1235
+    expect(labels).toContain('285'); // thân hộp 285
+    expect(labels).toContain('150'); // nắp đối khẩu W/2 = 150
+    expect(labels).toContain('585'); // tổng dọc: 150 + 285 + 150 = 585
+
+    // Đảm bảo không có nhãn rác hay số bị vỡ (ví dụ 28 do tính sai)
+    expect(labels).not.toContain('28');
+
+    // Kiểm tra khoảng cách an toàn giữa 2 cột đo dọc ngăn ngừa hoàn toàn va chạm chữ
+    const vertMainLines = dims.filter((d) => d.start[0] === d.end[0] && d.label);
+    const xCoords = Array.from(new Set(vertMainLines.map((d) => d.start[0]))).sort((a, b) => a - b);
+    expect(xCoords.length).toBe(2);
+    expect(xCoords[1] - xCoords[0]).toBeGreaterThanOrEqual(30); // Cách nhau ít nhất 30mm
+  });
+
   it('lưu, đọc, tìm kiếm và xoá mẫu hộp tự tạo trong customTemplateStore', () => {
     // Giả lập lưu mẫu hộp công ty
     const fefco = getBoxDef('fefco-0201')!;

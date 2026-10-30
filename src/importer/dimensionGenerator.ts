@@ -14,30 +14,29 @@ export function generateImportedDimensions(
   dielineBbox: [number, number, number, number]
 ): DimensionLine[] {
   const lines: DimensionLine[] = [];
-  const [minX, minY, width, height] = dielineBbox;
-  const maxX = minX + width;
-  const maxY = minY + height;
+  const [minX, minY] = dielineBbox;
 
-  // Tính toạ độ X của các cột
+  // Tính toạ độ X của các cột (tuần tự theo cấu trúc hình học thực tế)
   const x0 = minX;
-  const x1 = minX + s.glueWidth;
+  const x1 = x0 + s.glueWidth;
   const x2 = x1 + targetL;
   const x3 = x2 + targetW;
   const x4 = x3 + targetL;
-  const x5 = maxX;
+  const x5 = x4 + targetW;
 
-  // Tính toạ độ Y của các vùng
-  const y0 = minY;
-  let y1 = s.yTop;
-  let y2 = s.yTop + targetH;
-  let y3 = maxY;
-
+  // Tính chiều cao nắp trên và nắp đáy
+  let topFlapH = s.yTop - s.minY;
+  let bottomFlapH = s.maxY - s.yBottom;
   if (s.isRSCFlap) {
-    const flapH = targetW / 2;
-    y1 = y0 + flapH;
-    y2 = y1 + targetH;
-    y3 = y2 + flapH;
+    topFlapH = targetW / 2;
+    bottomFlapH = targetW / 2;
   }
+
+  // Tính toạ độ Y của các vùng (tuần tự, đảm bảo y0 < y1 < y2 < y3 luôn đúng)
+  const y0 = minY;
+  const y1 = y0 + topFlapH;
+  const y2 = y1 + targetH;
+  const y3 = y2 + bottomFlapH;
 
   const tickLen = 2.5;
 
@@ -85,7 +84,7 @@ export function generateImportedDimensions(
       start: [xPos, yStart],
       end: [xPos, yEnd],
       label,
-      mid: [xPos + 4, ym],
+      mid: [xPos + 5, ym],
     });
     // 2 vạch chéo 45 độ chuẩn CAD
     lines.push({
@@ -102,30 +101,32 @@ export function generateImportedDimensions(
     });
     // Đường dóng từ mép khuôn sang đường đo
     lines.push({
-      start: [maxX, yStart],
+      start: [x5, yStart],
       end: [xPos + 2, yStart],
       label: '',
-      mid: [maxX, yStart],
+      mid: [x5, yStart],
     });
     lines.push({
-      start: [maxX, yEnd],
+      start: [x5, yEnd],
       end: [xPos + 2, yEnd],
       label: '',
-      mid: [maxX, yEnd],
+      mid: [x5, yEnd],
     });
   }
 
-  // 1. Chuỗi kích thước chi tiết ngang (Top Chain 1) - đặt cách mép trên 12mm
-  const yDim1 = y0 - 12;
-  addHorizDim(x0, x1, yDim1, `${Math.round(s.glueWidth)}`);
+  // 1. Chuỗi kích thước chi tiết ngang (Top Chain 1) - đặt cách mép trên 16mm
+  const yDim1 = y0 - 16;
+  if (s.glueWidth > 3) {
+    addHorizDim(x0, x1, yDim1, `${Math.round(s.glueWidth)}`);
+  }
   addHorizDim(x1, x2, yDim1, `${Math.round(targetL)}`);
   addHorizDim(x2, x3, yDim1, `${Math.round(targetW)}`);
   addHorizDim(x3, x4, yDim1, `${Math.round(targetL)}`);
   addHorizDim(x4, x5, yDim1, `${Math.round(targetW)}`);
 
-  // 2. Kích thước tổng ngang (Top Chain 2) - đặt cách mép trên 26mm
-  const yDim2 = y0 - 26;
-  const totalW = Math.round(maxX - minX);
+  // 2. Kích thước tổng ngang (Top Chain 2) - cách hàng 1 là 25mm để khoảng cách thoáng
+  const yDim2 = yDim1 - 25;
+  const totalW = Math.round(x5 - x0);
   lines.push({
     start: [x0, yDim2],
     end: [x5, yDim2],
@@ -157,26 +158,27 @@ export function generateImportedDimensions(
     mid: [x5, yDim1],
   });
 
-  // 3. Chuỗi kích thước chi tiết dọc (Right Chain 1) - đặt cách mép phải 14mm
-  const xDim1 = maxX + 14;
-  const topFlapH = Math.round(y1 - y0);
-  const bottomFlapH = Math.round(y3 - y2);
-  if (topFlapH > 5) {
-    addVertDim(y0, y1, xDim1, `${topFlapH}`);
+  // 3. Chuỗi kích thước chi tiết dọc (Right Chain 1) - đặt cách mép phải 18mm
+  const xDim1 = x5 + 18;
+  const roundTopFlap = Math.round(topFlapH);
+  const roundBottomFlap = Math.round(bottomFlapH);
+
+  if (roundTopFlap > 5) {
+    addVertDim(y0, y1, xDim1, `${roundTopFlap}`);
   }
   addVertDim(y1, y2, xDim1, `${Math.round(targetH)}`);
-  if (bottomFlapH > 5) {
-    addVertDim(y2, y3, xDim1, `${bottomFlapH}`);
+  if (roundBottomFlap > 5) {
+    addVertDim(y2, y3, xDim1, `${roundBottomFlap}`);
   }
 
-  // 4. Kích thước tổng dọc (Right Chain 2) - đặt cách mép phải 28mm
-  const xDim2 = maxX + 28;
-  const totalH = Math.round(maxY - minY);
+  // 4. Kích thước tổng dọc (Right Chain 2) - cách cột 1 là 35mm để ngăn hoàn toàn việc đè chữ số
+  const xDim2 = xDim1 + 35;
+  const totalH = Math.round(y3 - y0);
   lines.push({
     start: [xDim2, y0],
     end: [xDim2, y3],
     label: `${totalH}`,
-    mid: [xDim2 + 4, (y0 + y3) / 2],
+    mid: [xDim2 + 5, (y0 + y3) / 2],
   });
   lines.push({
     start: [xDim2 - tickLen, y0 + tickLen],
