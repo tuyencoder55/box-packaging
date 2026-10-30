@@ -29,6 +29,29 @@ export function getSampleDxf(): { name: string; content: string; l: number; w: n
 }
 
 /**
+ * Sinh chuỗi DXF chuẩn của thùng carton FEFCO-0201 (L=300, W=200, H=150)
+ */
+export function getSampleFefcoDxf(): { name: string; content: string; l: number; w: number; h: number } {
+  const box = getBoxDef('fefco-0201')!;
+  const panels = box.build({
+    l: 300,
+    w: 200,
+    h: 150,
+    t: 4,
+    opts: {},
+  });
+  const dieline = buildDieline(layoutPanels(panels));
+  const content = generateDxfContent(dieline);
+  return {
+    name: 'sample_fefco_0201.dxf',
+    content,
+    l: 300,
+    w: 200,
+    h: 150,
+  };
+}
+
+/**
  * Sinh chuỗi SVG chuẩn của hộp Snap Lock Bottom (L=90, W=60, H=150)
  */
 export function getSampleSvg(): { name: string; content: string; l: number; w: number; h: number } {

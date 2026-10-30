@@ -92,6 +92,18 @@ export function autoDetectStructure(
   const xCol1End = xGlueEnd + l0;
   const xCol2End = xCol1End + w0;
   const xCol3End = xCol2End + l0;
+  const maxX = minX + totalW;
+  const maxY = minY + totalH;
+
+  const topFlapH = yTop - minY;
+  const bottomFlapH = maxY - yBottom;
+  // Nhận diện nếu là thùng nắp đối khẩu (RSC / FEFCO 0201) khi chiều cao nắp ~ W0 / 2
+  const isRSCFlap =
+    w0 > 0 &&
+    topFlapH > 10 &&
+    bottomFlapH > 10 &&
+    Math.abs(topFlapH - w0 / 2) <= 12 &&
+    Math.abs(bottomFlapH - w0 / 2) <= 12;
 
   return {
     l0,
@@ -104,6 +116,11 @@ export function autoDetectStructure(
     xCol1End,
     xCol2End,
     xCol3End,
+    minX,
+    minY,
+    maxX,
+    maxY,
+    isRSCFlap,
   };
 }
 
@@ -140,20 +157,38 @@ export function mapX(x: number, s: DetectedBoxStructure, targetL: number, target
 /**
  * Biến đổi toạ độ y của một điểm dựa trên phân vùng cấu trúc hộp
  */
-export function mapY(y: number, s: DetectedBoxStructure, targetH: number): number {
-  const { yTop, yBottom, h0 } = s;
+export function mapY(y: number, s: DetectedBoxStructure, targetH: number, targetW?: number): number {
+  const { yTop, yBottom, h0, minY, maxY, isRSCFlap, w0 } = s;
 
   if (y <= yTop) {
-    // Vùng nắp trên, tai treo, tai bụi: giữ nguyên 100% hình học nắp & góc bo
+    if (isRSCFlap && targetW !== undefined && targetW > 0 && w0 > 0) {
+      // Thùng nắp đối khẩu FEFCO 0201: chiều cao nắp trên = targetW / 2
+      const origFlapH = Math.max(1, yTop - minY);
+      const targetFlapH = targetW / 2;
+      const ratio = (yTop - y) / origFlapH;
+      return yTop - ratio * targetFlapH;
+    }
+    // Hộp gài nắp: giữ nguyên 100% hình học nắp & tai gài
     return y;
   }
+
   if (y <= yBottom) {
     // Vùng thân hộp: dãn theo chiều cao targetH
     const ratio = (y - yTop) / h0;
     return yTop + ratio * targetH;
   }
-  // Vùng đáy hộp: tịnh tiến toàn bộ hệ thống đáy khoá/nắp đáy xuống dưới
+
+  // Vùng đáy hộp
   const deltaH = targetH - h0;
+  if (isRSCFlap && targetW !== undefined && targetW > 0 && w0 > 0) {
+    // Thùng nắp đối khẩu FEFCO 0201: chiều cao nắp đáy = targetW / 2
+    const origFlapH = Math.max(1, maxY - yBottom);
+    const targetFlapH = targetW / 2;
+    const ratio = (y - yBottom) / origFlapH;
+    return yTop + targetH + ratio * targetFlapH;
+  }
+
+  // Hộp gài nắp / đáy khoá: tịnh tiến toàn bộ hệ thống đáy khoá xuống dưới
   return y + deltaH;
 }
 
@@ -171,8 +206,8 @@ export function rescaleDieline(
   const creaseSegs: Seg[] = [];
 
   for (const seg of imported.segments) {
-    const aNew: Pt = [mapX(seg.a[0], s, targetL, targetW), mapY(seg.a[1], s, targetH)];
-    const bNew: Pt = [mapX(seg.b[0], s, targetL, targetW), mapY(seg.b[1], s, targetH)];
+    const aNew: Pt = [mapX(seg.a[0], s, targetL, targetW), mapY(seg.a[1], s, targetH, targetW)];
+    const bNew: Pt = [mapX(seg.b[0], s, targetL, targetW), mapY(seg.b[1], s, targetH, targetW)];
 
     const resSeg: Seg = { a: aNew, b: bNew };
     if (seg.type === 'crease') {

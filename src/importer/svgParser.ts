@@ -15,6 +15,23 @@ export function parseSvgString(svgContent: string): { segments: RawSegment[]; bb
     const gAttrs = groupMatch[1].toLowerCase();
     const gBody = groupMatch[2];
 
+    // Bỏ qua các group kích thước, chú thích, chữ viết
+    if (
+      gAttrs.includes('dimension') ||
+      gAttrs.includes('dim') ||
+      gAttrs.includes('text') ||
+      gAttrs.includes('kichthuoc') ||
+      gAttrs.includes('kích thước') ||
+      gAttrs.includes('anno') ||
+      gAttrs.includes('note') ||
+      gAttrs.includes('frame') ||
+      gAttrs.includes('khung') ||
+      gAttrs.includes('border') ||
+      gAttrs.includes('title')
+    ) {
+      continue;
+    }
+
     const isCreaseGroup =
       gAttrs.includes('crease') ||
       gAttrs.includes('fold') ||
@@ -29,9 +46,10 @@ export function parseSvgString(svgContent: string): { segments: RawSegment[]; bb
     parseElementsFromBody(gBody, defaultType, segments);
   }
 
-  // 2. Nếu file SVG không chia khối <g> rõ ràng, quét toàn bộ file
+  // 2. Nếu file SVG không chia khối <g> rõ ràng, quét toàn bộ file (loại bỏ thẻ <text> và các group dim)
   if (!matchedGroupRange || segments.length === 0) {
-    parseElementsFromBody(svgContent, 'cut', segments);
+    const cleanedSvg = svgContent.replace(/<text\b[^>]*>[\s\S]*?<\/text>/gi, '');
+    parseElementsFromBody(cleanedSvg, 'cut', segments);
   }
 
   if (segments.length === 0) {

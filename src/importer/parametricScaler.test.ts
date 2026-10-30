@@ -8,6 +8,7 @@ import { parseDxfString } from './dxfParser';
 import { autoDetectStructure, rescaleDieline } from './parametricScaler';
 import { parseSvgString } from './svgParser';
 import type { ImportedDieline } from './types';
+import { buildDimensionLines } from '../render2d/dimensions';
 
 describe('Smart DXF & SVG Importer + Parametric Resizer', () => {
   // Chuẩn bị dieline mẫu chuẩn (Reverse Tuck End: L=80, W=50, H=140, g=15)
@@ -98,5 +99,48 @@ describe('Smart DXF & SVG Importer + Parametric Resizer', () => {
     expect(newWidth).toBeCloseTo(335, 1);
     // Chiều cao mới = 272 + (160 - 140) = 292
     expect(newHeight).toBeCloseTo(292, 1);
+  });
+
+  it('nhận diện chính xác file DXF thùng carton FEFCO-0201 có chứa đường kích thước DIMENSION từ AutoCAD', () => {
+    const fefco = getBoxDef('fefco-0201')!;
+    const fPanels = fefco.build({ l: 300, w: 200, h: 150, t: 4, opts: {} });
+    const fLayout = layoutPanels(fPanels);
+    const fDieline = buildDieline(fLayout);
+    const fDims = buildDimensionLines(fefco.dims, fLayout, { l: 300, w: 200, h: 150, t: 4 }, 'mm', fefco.id);
+
+    // Xuất DXF kèm layer DIMENSION (như file AutoCAD người dùng xuất ra)
+    const dxfString = generateDxfContent(fDieline, 5, fDims);
+
+    const parsed = parseDxfString(dxfString);
+    // Các đường kích thước phải được tự động lọc bỏ (giảm từ 95 xuống chính xác 54 đoạn dao cắt + cấn)
+    expect(parsed.segments.length).toBe(54);
+
+    const structure = autoDetectStructure(parsed.segments, parsed.bbox);
+    expect(structure.l0).toBe(300);
+    expect(structure.w0).toBe(200);
+    expect(structure.h0).toBe(150);
+    expect(structure.glueWidth).toBeCloseTo(35, 1);
+    expect(structure.isRSCFlap).toBe(true); // Nhận diện đúng thùng đối khẩu RSC
+
+    // Khổ phôi gốc phải chuẩn xác: 35 + 2*300 + 2*200 = 1035mm (không bị phình lên 1092mm)
+    expect(parsed.bbox[2]).toBeCloseTo(1035, 1);
+    expect(parsed.bbox[3]).toBeCloseTo(350, 1);
+
+    const imported: ImportedDieline = {
+      name: 'FEFCO-0201',
+      sourceType: 'dxf',
+      segments: parsed.segments,
+      bbox: parsed.bbox,
+      structure,
+    };
+
+    // Co dãn thông minh sang L=400, W=250, H=200
+    const rescaled = rescaleDieline(imported, 400, 250, 200);
+    const [, , newW, newH] = rescaled.bbox;
+
+    // Chiều rộng mới: 35 + 2*400 + 2*250 = 1335mm
+    expect(newW).toBeCloseTo(1335, 1);
+    // Chiều cao mới: nắp trên (125) + thân (200) + nắp đáy (125) = 450mm
+    expect(newH).toBeCloseTo(450, 1);
   });
 });

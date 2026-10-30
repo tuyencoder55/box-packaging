@@ -7,7 +7,7 @@ import { parseDxfString } from '../../importer/dxfParser';
 import { autoDetectStructure, rescaleDieline } from '../../importer/parametricScaler';
 import { parseSvgString } from '../../importer/svgParser';
 import type { ImportedDieline } from '../../importer/types';
-import { getSampleDxf, getSampleSvg } from './sampleFiles';
+import { getSampleDxf, getSampleFefcoDxf, getSampleSvg } from './sampleFiles';
 
 function downloadBlob(filename: string, content: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
@@ -186,31 +186,43 @@ export function openImporterModal(onOpenInStudio?: (dieline: Dieline, l: number,
       <input type="file" id="file-input" accept=".dxf,.svg" style="display: none;" />
     </div>
 
-    <div style="display: flex; gap: 8px; margin-top: 10px;">
+    <div style="display: flex; gap: 6px; margin-top: 10px;">
       <button id="btn-sample-dxf" type="button" style="
         flex: 1;
-        padding: 6px 10px;
+        padding: 6px 6px;
         background: #232733;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 6px;
-        color: #94a3b8;
+        color: #cbd5e1;
         font-size: 11px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.15s ease;
-      ">📦 Mẫu Hộp Gài (DXF)</button>
+      ">📦 Hộp Gài</button>
+      <button id="btn-sample-fefco" type="button" style="
+        flex: 1;
+        padding: 6px 6px;
+        background: #232733;
+        border: 1px solid rgba(0, 210, 135, 0.3);
+        border-radius: 6px;
+        color: #00d287;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      ">📦 Thùng A1</button>
       <button id="btn-sample-svg" type="button" style="
         flex: 1;
-        padding: 6px 10px;
+        padding: 6px 6px;
         background: #232733;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 6px;
-        color: #94a3b8;
+        color: #cbd5e1;
         font-size: 11px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.15s ease;
-      ">🎁 Mẫu Đáy Khoá (SVG)</button>
+      ">🎁 Đáy Khoá</button>
     </div>
   `;
   leftCol.appendChild(uploadSection);
@@ -442,14 +454,19 @@ export function openImporterModal(onOpenInStudio?: (dieline: Dieline, l: number,
     infoCard.style.display = 'block';
     const cutCount = segments.filter((s) => s.type === 'cut').length;
     const creaseCount = segments.filter((s) => s.type === 'crease').length;
+    const boxTypeBadge = structure.isRSCFlap
+      ? '<span style="background: rgba(0,210,135,0.15); color: #00d287; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 6px;">THÙNG CARTON A1 / RSC</span>'
+      : '<span style="background: rgba(37,99,235,0.15); color: #93c5fd; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 6px;">HỘP GÀI / FOLDING CARTON</span>';
+
     infoCard.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-size: 11px; font-weight: 700; color: #00d287; text-transform: uppercase;">✓ Nhận diện thành công</span>
+        <span style="font-size: 11px; font-weight: 700; color: #00d287; text-transform: uppercase;">✓ Đã lọc layer & Nhận diện chuẩn</span>
         <span style="font-size: 11px; color: #94a3b8;">${name}</span>
       </div>
       <div style="font-size: 12px; color: #e2e8f0; line-height: 1.5;">
-        Kích thước gốc: <b>L=${structure.l0} × W=${structure.w0} × H=${structure.h0} mm</b><br/>
-        Lưỡi dán: <b>${structure.glueWidth} mm</b> | Cắt: <b>${cutCount}</b> đoạn | Cấn: <b>${creaseCount}</b> nếp
+        Kích thước gốc: <b>L=${structure.l0} × W=${structure.w0} × H=${structure.h0} mm</b> ${boxTypeBadge}<br/>
+        Lưỡi dán: <b>${structure.glueWidth} mm</b> | Cắt: <b>${cutCount}</b> đoạn | Cấn: <b>${creaseCount}</b> nếp<br/>
+        Khổ phôi chuẩn: <b>${Math.round(bbox[2])} × ${Math.round(bbox[3])} mm</b>
       </div>
     `;
 
@@ -533,6 +550,11 @@ export function openImporterModal(onOpenInStudio?: (dieline: Dieline, l: number,
   // Quick Samples
   uploadSection.querySelector('#btn-sample-dxf')?.addEventListener('click', () => {
     const sample = getSampleDxf();
+    handleLoadedFile(sample.name, sample.content, 'dxf');
+  });
+
+  uploadSection.querySelector('#btn-sample-fefco')?.addEventListener('click', () => {
+    const sample = getSampleFefcoDxf();
     handleLoadedFile(sample.name, sample.content, 'dxf');
   });
 
