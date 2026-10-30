@@ -13,6 +13,7 @@ import { initMockupCard, type MockupCardController } from '../ui/app/mockupCard'
 import { openExportModal } from '../ui/app/exportModal';
 import { initParamPanel, type AppDocState } from '../ui/app/paramPanel';
 import { createStepBar, type StepId } from '../ui/app/stepBar';
+import { openImporterModal } from '../ui/importer/importerModal';
 
 // Điểm vào trang Studio: kết nối thanh tham số, khung 2D, mockup 3D và xuất file
 function initStudio() {
@@ -264,9 +265,91 @@ function initStudio() {
     });
   }
 
+  // Nút Nhập DXF / SVG trên top-bar
+  const btnImport = document.createElement('button');
+  btnImport.id = 'btn-import-modal';
+  btnImport.type = 'button';
+  btnImport.style.cssText = `
+    background: #20242e;
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    margin-right: 8px;
+  `;
+  btnImport.innerHTML = '<span>📥 Nhập DXF/SVG</span>';
+  btnImport.addEventListener('mouseenter', () => {
+    btnImport.style.background = '#282d3b';
+    btnImport.style.borderColor = 'rgba(255, 255, 255, 0.22)';
+  });
+  btnImport.addEventListener('mouseleave', () => {
+    btnImport.style.background = '#20242e';
+    btnImport.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+  });
+  btnImport.addEventListener('click', () => {
+    openImporterModal((rescaledDieline, l, w, h, name) => {
+      loadImportedDieline(rescaledDieline, l, w, h, name);
+    });
+  });
+
+  if (btnExport && btnExport.parentElement) {
+    btnExport.parentElement.insertBefore(btnImport, btnExport);
+  }
+
   let zoomController: ZoomPanController | null = null;
+  let isCustomImported = false;
+
+  function loadImportedDieline(
+    dieline: Dieline,
+    l: number,
+    w: number,
+    h: number,
+    name: string
+  ) {
+    isCustomImported = true;
+    currentDieline = dieline;
+    currentDimLines = [
+      {
+        start: [dieline.bbox[0], dieline.bbox[1]],
+        end: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1]],
+        label: `Khổ phôi ngang: ${Math.round(dieline.bbox[2])} mm`,
+        mid: [dieline.bbox[0] + dieline.bbox[2] / 2, dieline.bbox[1] - 15],
+      },
+      {
+        start: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1]],
+        end: [dieline.bbox[0] + dieline.bbox[2], dieline.bbox[1] + dieline.bbox[3]],
+        label: `Khổ phôi dọc: ${Math.round(dieline.bbox[3])} mm`,
+        mid: [dieline.bbox[0] + dieline.bbox[2] + 15, dieline.bbox[1] + dieline.bbox[3] / 2],
+      },
+    ];
+
+    if (metaSpan) {
+      metaSpan.innerHTML = `— <b style="color:var(--color-primary);">${name}</b> (${l}×${w}×${h} mm)`;
+    }
+
+    if (viewport) {
+      const svg = renderSvgView(viewport, dieline, currentDimLines, {
+        cutColor: store.get().cutColor,
+        creaseColor: store.get().creaseColor,
+        dimColor: store.get().dimColor,
+        dimFont: store.get().dimFont,
+        dimFontSize: store.get().dimFontSize,
+      });
+      setupZoomPan(viewport, svg);
+    }
+  }
 
   function updateDielineView(s: AppDocState) {
+    if (isCustomImported) return;
+
     if (metaSpan) {
       const mode = s.sizeType === 'outer' ? 'phủ bì' : 'lòng';
       metaSpan.textContent = `— ${s.l}×${s.w}×${s.h} mm (${mode})`;
@@ -298,10 +381,28 @@ function initStudio() {
     mockupController?.updateModel(s, boxDef);
   }
 
-  updateDielineView(store.get());
+  if (params.get('imported') === 'true') {
+    try {
+      const rawImported = sessionStorage.getItem('boxmaker:imported_dieline');
+      if (rawImported) {
+        const parsed = JSON.parse(rawImported);
+        loadImportedDieline(parsed.dieline, parsed.l, parsed.w, parsed.h, parsed.name);
+      } else {
+        updateDielineView(store.get());
+      }
+    } catch {
+      updateDielineView(store.get());
+    }
+  } else {
+    updateDielineView(store.get());
+  }
+
   store.subscribe(
     (s) => s,
-    (s) => updateDielineView(s)
+    (s) => {
+      isCustomImported = false;
+      updateDielineView(s);
+    }
   );
 
   // Tự động lưu trạng thái vào localStorage khi có thay đổi (debounce 300ms)
